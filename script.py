@@ -22,6 +22,13 @@ args = vars(ap.parse_args())
 # part 2
 # load the image, convert it to grayscale, and blur it slightly
 image = cv2.imread(args["image"])
+
+
+# sharpen image
+kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
+image = cv2.filter2D(image, -1, kernel)
+
+
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 gray = cv2.GaussianBlur(gray, (7, 7), 0)
 # perform edge detection, then perform a dilation + erosion to
@@ -104,11 +111,11 @@ for c in cnts:
 orig2 = image.copy();
 for c in cnts:
 	# if the contour is not sufficiently large, ignore it
-	if cv2.contourArea(c) < 100:
+	if cv2.contourArea(c) < 10000:
 		continue
 
 	# area of the quarter
-	print(cv2.contourArea(c)/pixelsPerMetric/pixelsPerMetric)
+	print("area in in^2: " + str(cv2.contourArea(c)/pixelsPerMetric/pixelsPerMetric))
 	cv2.drawContours(orig2, cnts, -1, (0, 255, 0), 2)
 
 
