@@ -1,0 +1,29 @@
+{% extends "base.html" %} {% block css_link %}
+<link rel="stylesheet" href="../static/style.css" />
+{% endblock %} {% block body %}
+<form action="/post/" method="post" enctype="multipart/form-data">
+  <input type="file" name="file" />
+  <input type="submit" name="create_post" value="upload new post" />
+</form>
+
+<img class="post-img" src="/uploads/cur_image.jpg" alt="postimg" />
+
+<form action="/recog/" method="post" enctype="multipart/form-data">
+  <input type="submit" name="recog" value="run" />
+  <input type="text" name="width" />
+</form>
+<form action="/recog/" method="post" enctype="multipart/form-data">
+  <input type="submit" name="recog" value="increase sat" />
+  <input type="text" name="width" />
+</form>
+<form action="/recog/" method="post" enctype="multipart/form-data">
+  <input type="submit" name="recog" value="decrease sat" />
+  <input type="text" name="width" />
+</form>
+
+<form action="/recog/" method="post" enctype="multipart/form-data">
+  <input type="submit" name="recog" value="test" />
+  <input type="text" name="width" />
+</form>
+
+{% endblock %}

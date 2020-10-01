@@ -21,6 +21,6 @@ image = cv2.imread(args["image"])
 real_width = args["width"]
 orig = image.copy()
 
-measurements = optimized_masking_measurement(image, real_width)
-print(measurements["areas"])
-display_image(measurements["drawn_image"])
+data = optimized_masking_measurement(image, real_width)
+# print(data["areas"])
+display_image(data["drawn_image"])

@@ -32,11 +32,16 @@ def measurement(image, sq_ratio, lower_range, upper_range):
                             cv2.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
     areas = measure_area(cnts, sq_ratio)
+    display_image(edged)
 
     draw_contours(overlay_img, cnts, sq_ratio)
     return {"drawn_image": overlay_img,
             "areas": areas,
-            "original_image": image}
+            "lower_range": lower_range,
+            "upper_range": upper_range,
+            "original_image": image,
+            "sq_ratio": sq_ratio,
+            "error": False}
 
 
 def optimized_masking_measurement(image, real_width):
@@ -57,6 +62,8 @@ def optimized_masking_measurement(image, real_width):
         else:
             break
 
+    print("test")
+    print(data)
     if data is not {}:
         return {"drawn_image": data["drawn_image"],
                 "areas": areas,
@@ -70,15 +77,16 @@ def optimized_masking_measurement(image, real_width):
 
 
 def manual_area_adjustment(prev_data, increase_sat):
+
     if increase_sat:
-        prev_data["lower_range"][0][1] *= 1.1
-        prev_data["lower_range"][1][1] *= 1.1
+        prev_data["lower_range"][0][1] *= 1.05
+        prev_data["lower_range"][1][1] *= 1.05
     else:
-        prev_data["lower_range"][0][1] *= 0.9
-        prev_data["lower_range"][1][1] *= 0.9
+        prev_data["lower_range"][0][1] *= 0.95
+        prev_data["lower_range"][1][1] *= 0.95
 
     data = measurement(
         prev_data["original_image"], prev_data["sq_ratio"], prev_data["lower_range"], prev_data["upper_range"])
-    if not data["error"]:
-        display_image(data["drawn_image"])
+    # if not data["error"]:
+    #    display_image(data["drawn_image"])
     return data
