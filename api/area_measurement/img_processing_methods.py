@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from scipy.spatial import distance as dist
 
-# Purely for measure_area
+from constants import AREA_LOWER_LIMIT
 
 
 def midpoint(ptA, ptB):
@@ -28,18 +28,29 @@ def sharpen(image):
 
 
 def blur(image):
-    return cv2.GaussianBlur(image, (7, 7), 0)
+    return cv2.GaussianBlur(image, (3, 3), 0)
 
 
 def measure_area(image_background, contours, sq_ratio):
     areas = []
     for cont in contours:
         cont_area = cv2.contourArea(cont)/sq_ratio
+
         # if the contour is not sufficiently large, ignore it
-        print(cont_area)
-        if cont_area < 0.125:
+        if cont_area < AREA_LOWER_LIMIT:
             continue
 
         areas.append(cont_area)
-        cv2.drawContours(image_background, cont, -1, (0, 255, 0), 2)
+    areas.sort()
     return areas
+
+
+def draw_contours(image_background, contours, sq_ratio):
+    for cont in contours:
+        cont_area = cv2.contourArea(cont)/sq_ratio
+
+        # if the contour is not sufficiently large, ignore it
+        if cont_area < AREA_LOWER_LIMIT:
+            continue
+
+        cv2.drawContours(image_background, cont, -1, (0, 255, 0), 2)

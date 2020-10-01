@@ -1,5 +1,6 @@
 import argparse
 import numpy as np
+import cv2
 
 
 def parse_arguments():
@@ -14,3 +15,11 @@ def parse_arguments():
 def find_sq_ratio(image, real_width):
     img_width = image.shape[:2][1]
     return np.square(img_width/real_width)
+
+
+def display_image(image):
+    height, width = image.shape[:2]
+    cv2.namedWindow('Image', cv2.WINDOW_NORMAL)
+    cv2.resizeWindow('jpg', width, height)
+    cv2.imshow("Image", image)
+    cv2.waitKey(0)

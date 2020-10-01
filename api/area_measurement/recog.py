@@ -7,9 +7,9 @@ import cv2
 import math
 
 # Function imports
-from area_optimization import default_measurement
+from area_optimization import default_measurement, optimized_masking_measurement
 from img_processing_methods import apply_mask, sharpen, blur
-from helper import parse_arguments
+from helper import parse_arguments, display_image
 # Basic definitions
 
 #
@@ -21,12 +21,6 @@ image = cv2.imread(args["image"])
 real_width = args["width"]
 orig = image.copy()
 
-# Define display window dimensions
-height, width = image.shape[:2]
-cv2.namedWindow('Image', cv2.WINDOW_NORMAL)
-cv2.resizeWindow('jpg', width, height)
-
-measurements = default_measurement(image, real_width)
+measurements = optimized_masking_measurement(image, real_width)
 print(measurements["areas"])
-cv2.imshow("Image", measurements["drawn_image"])
-cv2.waitKey(0)
+display_image(measurements["drawn_image"])
