@@ -31,11 +31,10 @@ def blur(image):
     return cv2.GaussianBlur(image, (3, 3), 0)
 
 
-def measure_area(image_background, contours, sq_ratio):
+def measure_area(contours, sq_ratio):
     areas = []
     for cont in contours:
         cont_area = cv2.contourArea(cont)/sq_ratio
-
         # if the contour is not sufficiently large, ignore it
         if cont_area < AREA_LOWER_LIMIT:
             continue
@@ -43,14 +42,3 @@ def measure_area(image_background, contours, sq_ratio):
         areas.append(cont_area)
     areas.sort()
     return areas
-
-
-def draw_contours(image_background, contours, sq_ratio):
-    for cont in contours:
-        cont_area = cv2.contourArea(cont)/sq_ratio
-
-        # if the contour is not sufficiently large, ignore it
-        if cont_area < AREA_LOWER_LIMIT:
-            continue
-
-        cv2.drawContours(image_background, cont, -1, (0, 255, 0), 2)

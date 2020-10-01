@@ -6,80 +6,79 @@ from imutils import perspective
 from imutils import contours
 
 # Function imports
-from img_processing_methods import apply_mask, sharpen, blur, measure_area, draw_contours
-from helper import find_sq_ratio, display_image
+from img_processing_methods import apply_mask, sharpen, blur, measure_area
+from helper import find_sq_ratio, display_image, draw_contours, display_overlay
 
 # Constants import
-from constants import default_lower_range, default_upper_range, AREA_UPPER_LIMIT
+from constants import DEF_LOWER_RANGE, DEF_UPPER_RANGE, AREA_UPPER_LIMIT
 
 
 def default_measurement(image, real_width):
-    #
-    # Image processing
-    #
+    sq_ratio = find_sq_ratio(image, real_width)
+    data = measurement(image, sq_ratio, DEF_LOWER_RANGE, DEF_UPPER_RANGE)
+    if not data["error"]:
+        display_image(data["drawn_image"])
 
-    original = image.copy()
+
+def measurement(image, sq_ratio, lower_range, upper_range):
+    overlay_img = image.copy()
     _image = image.copy()
-
-    # SHARPEN & BLUR
-    display_image(_image)
-    #_image = sharpen(_image)
-    # _image = blur(_image)
-
-    # Apply Mask
-    _image = apply_mask(default_lower_range, default_upper_range, _image)
-
-    # Convert to grayscale
+    _image = apply_mask(lower_range, upper_range, _image)
     gray = cv2.cvtColor(_image, cv2.COLOR_BGR2GRAY)
-
-    # perform edge detection, then perform a dilation + erosion to
-    # close gaps in between object edges
     edged = cv2.Canny(gray, 50, 100)
-    edged = cv2.dilate(edged, None, iterations=5)
+    edged = cv2.dilate(edged, None, iterations=3)
     edged = cv2.erode(edged, None, iterations=3)
-
-    # find contours in the edge map
     cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL,
                             cv2.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
-    sq_ratio = find_sq_ratio(_image, real_width)
+    areas = measure_area(cnts, sq_ratio)
 
-    areas = measure_area(original, cnts, sq_ratio)
-    draw_contours(original, cnts, sq_ratio)
-
-    return {"drawn_image": original, "areas": areas}
+    draw_contours(overlay_img, cnts, sq_ratio)
+    return {"drawn_image": overlay_img,
+            "areas": areas,
+            "original_image": image}
 
 
 def optimized_masking_measurement(image, real_width):
-    original = image.copy()
-    _image = image.copy()
-    cur_lower_range = default_lower_range
-    cur_upper_range = default_upper_range
-    cnts = []
-    sq_ratio = find_sq_ratio(_image, real_width)
+    cur_lower_range = DEF_LOWER_RANGE
+    cur_upper_range = DEF_UPPER_RANGE
+    sq_ratio = find_sq_ratio(image, real_width)
     for i in range(10):
-        # standard image processing
-        # reset image each time
-        _image = image.copy()
-        _image = apply_mask(cur_lower_range, cur_upper_range, _image)
-        gray = cv2.cvtColor(_image, cv2.COLOR_BGR2GRAY)
-        edged = cv2.Canny(gray, 50, 100)
-        edged = cv2.dilate(edged, None, iterations=5)
-        edged = cv2.erode(edged, None, iterations=3)
-        cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL,
-                                cv2.CHAIN_APPROX_SIMPLE)
-        cnts = imutils.grab_contours(cnts)
-        areas = measure_area(original, cnts, sq_ratio)
-
-        # modify mask, reduce saturation limit
+        data = measurement(image, sq_ratio, cur_lower_range, cur_upper_range)
+        areas = data["areas"]
         if areas == []:
-            cur_lower_range[0][1] *= 0.8
-            cur_lower_range[1][1] *= 0.8
+            cur_lower_range[0][1] *= 0.9
+            cur_lower_range[1][1] *= 0.9
+            print("increasing num")
         elif areas[len(areas)-1] > AREA_UPPER_LIMIT:
-            cur_lower_range[0][1] *= 1.2
-            cur_lower_range[1][1] *= 1.2
+            cur_lower_range[0][1] *= 1.1
+            cur_lower_range[1][1] *= 1.1
+            print("decreasing num")
         else:
             break
 
-    draw_contours(original, cnts, sq_ratio)
-    return {"drawn_image": original, "areas": areas}
+    if data is not {}:
+        return {"drawn_image": data["drawn_image"],
+                "areas": areas,
+                "lower_range": cur_lower_range,
+                "upper_range": cur_upper_range,
+                "original_image": image,
+                "sq_ratio": sq_ratio,
+                "error": False}
+    else:
+        return {"error": True}
+
+
+def manual_area_adjustment(prev_data, increase_sat):
+    if increase_sat:
+        prev_data["lower_range"][0][1] *= 1.1
+        prev_data["lower_range"][1][1] *= 1.1
+    else:
+        prev_data["lower_range"][0][1] *= 0.9
+        prev_data["lower_range"][1][1] *= 0.9
+
+    data = measurement(
+        prev_data["original_image"], prev_data["sq_ratio"], prev_data["lower_range"], prev_data["upper_range"])
+    if not data["error"]:
+        display_image(data["drawn_image"])
+    return data
