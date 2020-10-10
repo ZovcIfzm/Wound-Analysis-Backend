@@ -21,14 +21,15 @@ import cv2
 from area_optimization import default_measurement, optimized_masking_measurement, manual_area_adjustment
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
 # called `app` in `main.py`.
-app = flask.Flask(__name__)
+app = flask.Flask(__name__, static_folder='../frontend/build',
+                  static_url_path='/')
 global test_val
 test_val = 0
 global data
 data = {}
 
 
-@app.route('/post/', methods=['POST', 'GET'])
+@ app.route('/post/', methods=['POST', 'GET'])
 def post():
     print("reached post")
     fileobj = flask.request.files["file"]
@@ -38,12 +39,12 @@ def post():
     return flask.redirect("/")
 
 
-@app.route('/time')
+@ app.route('/time')
 def show_time():
     return {"time": 4}
 
 
-@app.route('/recog/', methods=['POST', 'GET'])
+@ app.route('/recog/', methods=['POST', 'GET'])
 def run_recog():
     if flask.request.method == 'POST':
         global data
@@ -83,7 +84,7 @@ def run_recog():
 @ app.route('/')
 def hello():
     """Return a friendly HTTP greeting."""
-    return flask.render_template("index.html")
+    return app.send_static_file("index.html")
 
 
 @ app.route('/uploads/<path:filename>')
