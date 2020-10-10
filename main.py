@@ -21,7 +21,7 @@ import cv2
 from area_optimization import default_measurement, optimized_masking_measurement, manual_area_adjustment
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
 # called `app` in `main.py`.
-app = flask.Flask(__name__, static_folder='../frontend/build',
+app = flask.Flask(__name__, static_folder='frontend/build',
                   static_url_path='/')
 global test_val
 test_val = 0
