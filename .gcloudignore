@@ -21,3 +21,5 @@ __pycache__/
 # Manual
 area_measurement/
 node_modules/
+
+frontend-manual/

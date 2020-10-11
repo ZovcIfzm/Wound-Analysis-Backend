@@ -4,19 +4,19 @@ import React, { useState, useEffect } from 'react';
 import { makeStyles } from "@material-ui/core/styles";
 // @material-ui/icons
 // core components
-import Button from "components/CustomButtons/Button.js";
-import CustomInput from "components/CustomInput/CustomInput.js";
+import Button from "./components/CustomButtons/Button.js";
+import CustomInput from "./components/CustomInput/CustomInput.js";
 
 import styles from "assets/jss/material-kit-react/views/componentsSections/basicsStyle.js";
 import "./style.css";
 const useStyles = makeStyles(styles);
 
-export default function SectionBasics() {
+
+function App() {
   const [currentImage, setCurrentImage] = useState();
   const [testText, setTestText] = useState("default");
-  const classes = useStyles();
-  
   const [currentTime, setCurrentTime] = useState(0);
+  const classes = useStyles();
 
   useEffect(() => {
     fetch('/time').then(res => res.json()).then(data => {
@@ -38,18 +38,14 @@ export default function SectionBasics() {
     formData.append("image", currentImage)
     setTestText("tested21!")  
     
-    
-    await fetch("/testPrint", {
-      method: 'GET',
-      //body: formData
+    await fetch("/recog/", {
+      method: 'POST',
+      body: formData
     })
     .then(response => response.json())
     .then(data => {
-      //setCurrentImage(image)
-      setTestText("tested!")
-      console.log(data)
+      setCurrentImage(data)
     })
-    setTestText("tested23!")  
   }
 
   return (
@@ -79,7 +75,7 @@ export default function SectionBasics() {
             <img src={currentImage} style={{width: "100%", flex: 1}} />
           </div>
         </div>
-        
+      
         <h3>{testText}</h3>
         <p>The current time is {currentTime}.</p>
         
@@ -88,3 +84,6 @@ export default function SectionBasics() {
     </div>
   );
 }
+
+
+export default App;

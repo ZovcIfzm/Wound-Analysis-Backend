@@ -17,6 +17,7 @@ import flask
 import os
 from werkzeug.utils import secure_filename
 import cv2
+import time
 
 from area_optimization import default_measurement, optimized_masking_measurement, manual_area_adjustment
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
@@ -29,6 +30,11 @@ global data
 data = {}
 
 
+@app.route('/time')
+def get_current_time():
+    return {'time': time.time()}
+
+
 @ app.route('/post/', methods=['POST', 'GET'])
 def post():
     print("reached post")
@@ -39,9 +45,11 @@ def post():
     return flask.redirect("/")
 
 
-@ app.route('/time')
+@ app.route('/testPrint', methods=['POST', 'GET'])
 def show_time():
-    return {"time": 4}
+    print("tested")
+    response = {"test": "testedInFlask"}
+    return flask.make_response(flask.jsonify(response))
 
 
 @ app.route('/recog/', methods=['POST', 'GET'])
