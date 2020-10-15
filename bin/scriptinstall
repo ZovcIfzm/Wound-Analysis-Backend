@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# Stop on errors, print commands
+set -Eeuo pipefail
+set -x
+
+# Create a Python virtual environment
+python3 -m venv env
+
+# Activate Python virtual environment, avoiding some bad bash habits in the auto-generated activate script.
+set +u
+source env/bin/activate
+set -u
+
+# Install nodeenv
+pip install nodeenv
+
+# Install JavaScript virtual environment
+nodeenv --python-virtualenv
+
+# Deactivate and reactivate the Python virtual environment
+set +u
+deactivate
+source env/bin/activate
+set -u
+
+# Install back end
+pip install -r requirements.txt
+pip install -e .
+
+# Install front end
+cd frontend
+npm install .
+cd ..
