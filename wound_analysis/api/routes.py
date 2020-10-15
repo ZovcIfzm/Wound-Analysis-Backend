@@ -5,6 +5,7 @@ import os
 from werkzeug.utils import secure_filename
 import cv2
 import time
+import base64
 
 import pathlib
 import uuid
@@ -52,17 +53,19 @@ def run_recog():
     filename = flask.request.form.get("filename")
     mode = flask.request.form.get("mode")
     img_url = str(wound_analysis.app.config["UPLOAD_FOLDER"]/filename)
-    const_img_url = str(wound_analysis.app.config["UPLOAD_FOLDER"]/"analyzed.png")
+    #const_img_url = str(wound_analysis.app.config["UPLOAD_FOLDER"]/"analyzed.png")
+
     if mode == "run":
         width = float(flask.request.form.get("width"))
-        print(width)
         image = cv2.imread(img_url)
         data = optimized_masking_measurement(image, width)
-        cv2.imwrite(img_url, data["drawn_image"])
-        cv2.imwrite(const_img_url, data["drawn_image"])
-        print("img url ok: ", img_url)
-        print("img url ok: ", const_img_url)
-        return {"analyzed": True}
+        conv = "conv_" + filename
+        conv_img_url = str(wound_analysis.app.config["UPLOAD_FOLDER"]/conv)
+        cv2.imwrite(conv_img_url, data["drawn_image"])
+        #cv2.imwrite(const_img_url, data["drawn_image"])
+        print("/analyze/, img_url: ", conv)
+        #print("img url ok: ", const_img_url)
+        return {"url": conv}
 
     elif mode == "increase sat":
         width = float(flask.request.form.get("width"))
@@ -122,7 +125,7 @@ def upload():
 def testDataBase():
     return "tested"
 
-@wound_analysis.app.route('/database/uploads/<path:filename>', methods=['POST', 'GET'])
+@wound_analysis.app.route('/uploads/<path:filename>', methods=['POST', 'GET'])
 def download_file(filename):
     return flask.send_from_directory(wound_analysis.app.config['UPLOAD_FOLDER'],
                                      filename, as_attachment=True)

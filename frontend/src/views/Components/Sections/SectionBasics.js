@@ -14,7 +14,7 @@ const useStyles = makeStyles(styles);
 export default function SectionBasics() {
   const [currentImage, setCurrentImage] = useState();
   const [currentImageFilename, setCurrentImageFilename] = useState();
-  const [analyzed, setAnalyzed] = useState(0);
+  const [analyzedUrl, setAnalyzedUrl] = useState(0);
   const [imageWidth, setImageWidth] = useState();
   const [testText, setTestText] = useState("default");
   const classes = useStyles();
@@ -30,7 +30,6 @@ export default function SectionBasics() {
   const onImageChange = event => {
     if (event.target.files && event.target.files[0]) {
       let img = event.target.files[0];
-      console.log(img)
       setCurrentImage(URL.createObjectURL(img));
       const form = new FormData();
       form.append('file', img);
@@ -45,7 +44,6 @@ export default function SectionBasics() {
           return response.json()
         })
         .then((data) => {
-          console.log("dataOnImageChange:, ", data)
           setCurrentImageFilename(data.filename)
         })
         .catch((error) => console.log(error));
@@ -54,14 +52,12 @@ export default function SectionBasics() {
 
   const analyzeImage = async (event) => {
     event.preventDefault();
-    console.log("curF: ", currentImageFilename)
     if (currentImageFilename && imageWidth) {
       const url = "/analyze/"
       const form = new FormData();
       form.append('filename', currentImageFilename);
       form.append('mode', "run")
       form.append("width", imageWidth)
-      console.log("cur: ", currentImageFilename)
       const options = {
         method: 'POST',
         body: form,
@@ -72,9 +68,9 @@ export default function SectionBasics() {
           return response.json()
         })
         .then((data) => {
-          console.log("in data2")
-          console.log(data)
-          setAnalyzed(data.analyzed)
+          console.log(`http://localhost:5000/uploads/${data.url}`)
+          setAnalyzedUrl(`http://localhost:5000/uploads/${data.url}`)
+          
         })
         .catch((error) => console.log(error));
     }
@@ -120,11 +116,10 @@ export default function SectionBasics() {
           </div>
           <div className="column">
             <h3>Image</h3>
-            {currentImage && !analyzed ? 
+            {currentImage && !analyzedUrl ? 
             <img src={currentImage} style={{width: "100%", flex: 1}} alt="" />
-            : null}
-            {analyzed ? 
-            <img src={"../../../../../../database/uploads/analyzed.png"} style={{width: "100%", flex: 1}} alt="" />
+            : analyzedUrl ? 
+            <img src={analyzedUrl} style={{width: "100%", flex: 1}} alt="" />
             : null}
           </div>
         </div>

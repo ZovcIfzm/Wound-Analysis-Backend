@@ -62,8 +62,6 @@ def optimized_masking_measurement(image, real_width):
         else:
             break
 
-    print("test")
-    print(data)
     if data is not {}:
         return {"drawn_image": data["drawn_image"],
                 "areas": areas,
