@@ -32,7 +32,7 @@ def get_db():
     return flask.g.sqlite_db
 
 
-@insta485.app.teardown_appcontext
+@wound_analysis.app.teardown_appcontext
 def close_db(error):
     """Close the database at the end of a request.
 

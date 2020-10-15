@@ -6,6 +6,9 @@ from werkzeug.utils import secure_filename
 import cv2
 import time
 
+import pathlib
+import uuid
+
 import wound_analysis
 
 from wound_analysis.api.area_optimization import default_measurement, optimized_masking_measurement, manual_area_adjustment
@@ -18,6 +21,9 @@ global data
 data = {}
 
 
+wound_analysis.app.secret_key = \
+    b't\xc7\xe7\xbd(P1+\xb77]\xc1\xf4H\\\xd0\x8b.\r+|g\x8a\x83'
+
 @wound_analysis.app.route('/time')
 def get_current_time():
     return {'time': time.time()}
@@ -28,7 +34,7 @@ def post():
     print("reached post")
     fileobj = flask.request.files["file"]
 
-    fileobj.save(os.path.join(app.root_path, "cur_image.jpg"))
+    fileobj.save(os.path.join(wound_analysis.app.root_path, "cur_image.jpg"))
     print("post saved")
     return flask.redirect("/")
 
@@ -82,8 +88,34 @@ def hello():
     """Return a friendly HTTP greeting."""
     return wound_analysis.app.send_static_file("index.html")
 
+@wound_analysis.app.route('/upload/',  methods=['POST'])
+def upload():
+    # Connect to database
+    connection = wound_analysis.model.get_db()
 
-@wound_analysis.app.route('/uploads/<path:filename>')
+    fileobj = flask.request.files["file"]
+    filename = fileobj.filename
+
+    # Compute base name (filename without directory).  We use a UUID
+    # to avoid clashes with existing files, and ensure that the name
+    # is compatible with the filesystem.
+    uuid_basename = "{stem}{suffix}".format(
+        stem=uuid.uuid4().hex,
+        suffix=pathlib.Path(filename).suffix
+    )
+
+    # Save to disk
+    path = wound_analysis.app.config["UPLOAD_FOLDER"]/uuid_basename
+    fileobj.save(path)
+
+    connection.execute(
+        "INSERT INTO images(filename)"
+        "VALUES(?)", (uuid_basename,)
+    )
+    return path
+    
+
+@wound_analysis.app.route('/download/<path:filename>')
 def download_file(filename):
     return flask.send_from_directory("",
                                      filename, as_attachment=True)
