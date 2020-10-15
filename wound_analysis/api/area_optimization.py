@@ -32,7 +32,7 @@ def measurement(image, sq_ratio, lower_range, upper_range):
                             cv2.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
     areas = measure_area(cnts, sq_ratio)
-    display_image(edged)
+    #display_image(edged)
 
     draw_contours(overlay_img, cnts, sq_ratio)
     return {"drawn_image": overlay_img,

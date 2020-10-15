@@ -13,6 +13,9 @@ const useStyles = makeStyles(styles);
 
 export default function SectionBasics() {
   const [currentImage, setCurrentImage] = useState();
+  const [currentImageFilename, setCurrentImageFilename] = useState();
+  const [analyzed, setAnalyzed] = useState(0);
+  const [imageWidth, setImageWidth] = useState();
   const [testText, setTestText] = useState("default");
   const classes = useStyles();
   
@@ -28,10 +31,9 @@ export default function SectionBasics() {
     if (event.target.files && event.target.files[0]) {
       let img = event.target.files[0];
       console.log(img)
-        
+      setCurrentImage(URL.createObjectURL(img));
       const form = new FormData();
       form.append('file', img);
-      setCurrentImage(URL.createObjectURL(img));
       const url = "/upload/"
       const options = {
         method: 'POST',
@@ -43,32 +45,52 @@ export default function SectionBasics() {
           return response.json()
         })
         .then((data) => {
-          console.log("in data")
-          console.log(data)
+          console.log("dataOnImageChange:, ", data)
+          setCurrentImageFilename(data.filename)
         })
         .catch((error) => console.log(error));
     }
   };
 
   const analyzeImage = async (event) => {
-    setTestText("tested!")
-    const formData = new FormData()
+    event.preventDefault();
+    console.log("curF: ", currentImageFilename)
+    if (currentImageFilename && imageWidth) {
+      const url = "/analyze/"
+      const form = new FormData();
+      form.append('filename', currentImageFilename);
+      form.append('mode', "run")
+      form.append("width", imageWidth)
+      console.log("cur: ", currentImageFilename)
+      const options = {
+        method: 'POST',
+        body: form,
+      };
+      fetch(url, options)
+        .then((response) => {
+          if (!response.ok) throw Error(response.statusText);
+          return response.json()
+        })
+        .then((data) => {
+          console.log("in data2")
+          console.log(data)
+          setAnalyzed(data.analyzed)
+        })
+        .catch((error) => console.log(error));
+    }
+    else if (currentImageFilename && !imageWidth) {
+      alert("Please specify an image width")
+    }
+    else if (!currentImageFilename && imageWidth) {
+      alert("Please upload an image")
+    }
+    else{
+      alert("Please upload an image and specify it's real width")
+    }
+  }
 
-    formData.append("image", currentImage)
-    setTestText("tested21!")  
-    
-    
-    await fetch("/testPrint", {
-      method: 'GET',
-      //body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-      //setCurrentImage(image)
-      setTestText("tested!")
-      console.log(data)
-    })
-    setTestText("tested23!")  
+  const handleOnChange = (event) => {
+    setImageWidth(event.target.value)
   }
 
   return (
@@ -90,12 +112,20 @@ export default function SectionBasics() {
                 formControlProps={{
                   fullWidth: true
                 }}
+                inputProps={{
+                  onChange: handleOnChange
+                }}
               />
             </div>
           </div>
           <div className="column">
             <h3>Image</h3>
+            {currentImage && !analyzed ? 
             <img src={currentImage} style={{width: "100%", flex: 1}} alt="" />
+            : null}
+            {analyzed ? 
+            <img src={"../../../../../../database/uploads/analyzed.png"} style={{width: "100%", flex: 1}} alt="" />
+            : null}
           </div>
         </div>
         

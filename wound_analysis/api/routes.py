@@ -45,39 +45,41 @@ def show_time():
     return {"test": "testedInFlask"}
 
 
-@wound_analysis.app.route('/recog/', methods=['POST', 'GET'])
+@wound_analysis.app.route('/analyze/', methods=['POST', 'GET'])
 def run_recog():
-    if flask.request.method == 'POST':
-        global data
-        global test_val
-        if flask.request.form.get("recog") is not None:
-            value = flask.request.form.get("recog")
-            img_url = "cur_image.jpg"
-            if value == "run":
-                width = float(flask.request.form.get("width"))
-                print(width)
-                image = cv2.imread(img_url)
-                data = optimized_masking_measurement(image, width)
-                print("printing data")
+    global data
+    global test_val
+    filename = flask.request.form.get("filename")
+    mode = flask.request.form.get("mode")
+    img_url = str(wound_analysis.app.config["UPLOAD_FOLDER"]/filename)
+    const_img_url = str(wound_analysis.app.config["UPLOAD_FOLDER"]/"analyzed.png")
+    if mode == "run":
+        width = float(flask.request.form.get("width"))
+        print(width)
+        image = cv2.imread(img_url)
+        data = optimized_masking_measurement(image, width)
+        cv2.imwrite(img_url, data["drawn_image"])
+        cv2.imwrite(const_img_url, data["drawn_image"])
+        print("img url ok: ", img_url)
+        print("img url ok: ", const_img_url)
+        return {"analyzed": True}
 
-                cv2.imwrite('cur_image.jpg', data["drawn_image"])
+    elif mode == "increase sat":
+        width = float(flask.request.form.get("width"))
+        data = manual_area_adjustment(data, True)
+        print("printing data")
+        # print(data)
 
-            elif value == "increase sat":
-                width = float(flask.request.form.get("width"))
-                data = manual_area_adjustment(data, True)
-                print("printing data")
-                # print(data)
-
-                cv2.imwrite('cur_image.jpg', data["drawn_image"])
-            elif value == "decrease sat":
-                width = float(flask.request.form.get("width"))
-                data = manual_area_adjustment(data, False)
-                print("printing data")
-                # print(data)
-                cv2.imwrite('cur_image.jpg', data["drawn_image"])
-            elif value == "test":
-                test_val += 2
-                print(test_val)
+        cv2.imwrite('cur_image.jpg', data["drawn_image"])
+    elif mode == "decrease sat":
+        width = float(flask.request.form.get("width"))
+        data = manual_area_adjustment(data, False)
+        print("printing data")
+        # print(data)
+        cv2.imwrite('cur_image.jpg', data["drawn_image"])
+    elif mode == "test":
+        test_val += 2
+        print(test_val)
 
     return flask.redirect("/")
 
@@ -94,30 +96,43 @@ def upload():
 
     fileobj = flask.request.files["file"]
     filename = fileobj.filename
-    print("filename")
 
     # Compute base name (filename without directory).  We use a UUID
     # to avoid clashes with existing files, and ensure that the name
     # is compatible with the filesystem.
+    uuid_basename = filename
+    '''
     uuid_basename = "{stem}{suffix}".format(
         stem=uuid.uuid4().hex,
         suffix=pathlib.Path(filename).suffix
-    )
+    )'''
 
     # Save to disk
     path = wound_analysis.app.config["UPLOAD_FOLDER"]/uuid_basename
     fileobj.save(path)
+    
     '''
     connection.execute(
         "INSERT INTO images(filename)"
         "VALUES(?)", (uuid_basename,)
     )'''
-    return {"filename": uuid_basename}
+    return {"filename": filename}
     
+@wound_analysis.app.route('/database/', methods=['POST', 'GET'])
+def testDataBase():
+    return "tested"
 
-@wound_analysis.app.route('/download/<path:filename>')
+@wound_analysis.app.route('/database/uploads/<path:filename>', methods=['POST', 'GET'])
 def download_file(filename):
-    return flask.send_from_directory("",
+    return flask.send_from_directory(wound_analysis.app.config['UPLOAD_FOLDER'],
                                      filename, as_attachment=True)
+
+def parse_url(url):
+    split_url = url.split('\\')
+    return "\\\\".join(split_url)
+
+def parse_display(url):
+    split_url = url.split('\\\\')
+    return "".join(split_url)
 
 # [END gae_python38_app]
