@@ -6,11 +6,11 @@ from imutils import perspective
 from imutils import contours
 
 # Function imports
-from img_processing_methods import apply_mask, sharpen, blur, measure_area
-from helper import find_sq_ratio, display_image, draw_contours, display_overlay
+from wound_analysis.api.img_processing_methods import apply_mask, sharpen, blur, measure_area
+from wound_analysis.api.helper import find_sq_ratio, display_image, draw_contours, display_overlay
 
 # Constants import
-from constants import DEF_LOWER_RANGE, DEF_UPPER_RANGE, AREA_UPPER_LIMIT
+from wound_analysis.api.constants import DEF_LOWER_RANGE, DEF_UPPER_RANGE, AREA_UPPER_LIMIT
 
 
 def default_measurement(image, real_width):

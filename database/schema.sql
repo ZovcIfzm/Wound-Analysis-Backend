@@ -1,0 +1,7 @@
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE images(
+  imageId INTEGER NOT NULL PRIMARY KEY,
+  filename VARCHAR(64) NOT NULL,
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

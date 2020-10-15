@@ -2,7 +2,7 @@ import argparse
 import numpy as np
 import cv2
 
-from constants import AREA_LOWER_LIMIT
+from wound_analysis.api.constants import AREA_LOWER_LIMIT
 
 
 def parse_arguments():
