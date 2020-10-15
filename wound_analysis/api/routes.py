@@ -24,7 +24,7 @@ data = {}
 wound_analysis.app.secret_key = \
     b't\xc7\xe7\xbd(P1+\xb77]\xc1\xf4H\\\xd0\x8b.\r+|g\x8a\x83'
 
-@wound_analysis.app.route('/time')
+@wound_analysis.app.route('/time/')
 def get_current_time():
     return {'time': time.time()}
 
@@ -39,11 +39,10 @@ def post():
     return flask.redirect("/")
 
 
-@wound_analysis.app.route('/testPrint', methods=['POST', 'GET'])
+@wound_analysis.app.route('/testPrint/', methods=['POST', 'GET'])
 def show_time():
     print("tested")
-    response = {"test": "testedInFlask"}
-    return flask.make_response(flask.jsonify(response))
+    return {"test": "testedInFlask"}
 
 
 @wound_analysis.app.route('/recog/', methods=['POST', 'GET'])
@@ -88,13 +87,14 @@ def hello():
     """Return a friendly HTTP greeting."""
     return wound_analysis.app.send_static_file("index.html")
 
-@wound_analysis.app.route('/upload/',  methods=['POST'])
+@wound_analysis.app.route('/upload/',  methods=['POST', 'GET'])
 def upload():
     # Connect to database
     connection = wound_analysis.model.get_db()
 
     fileobj = flask.request.files["file"]
     filename = fileobj.filename
+    print("filename")
 
     # Compute base name (filename without directory).  We use a UUID
     # to avoid clashes with existing files, and ensure that the name
@@ -107,12 +107,12 @@ def upload():
     # Save to disk
     path = wound_analysis.app.config["UPLOAD_FOLDER"]/uuid_basename
     fileobj.save(path)
-
+    '''
     connection.execute(
         "INSERT INTO images(filename)"
         "VALUES(?)", (uuid_basename,)
-    )
-    return path
+    )'''
+    return {"filename": uuid_basename}
     
 
 @wound_analysis.app.route('/download/<path:filename>')

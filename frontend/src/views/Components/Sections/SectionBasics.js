@@ -19,7 +19,7 @@ export default function SectionBasics() {
   const [currentTime, setCurrentTime] = useState(0);
 
   useEffect(() => {
-    fetch('/time').then(res => res.json()).then(data => {
+    fetch('/time/').then(res => res.json()).then(data => {
       setCurrentTime(data.time);
     });
   }, []);
@@ -27,7 +27,26 @@ export default function SectionBasics() {
   const onImageChange = event => {
     if (event.target.files && event.target.files[0]) {
       let img = event.target.files[0];
+      console.log(img)
+        
+      const form = new FormData();
+      form.append('file', img);
       setCurrentImage(URL.createObjectURL(img));
+      const url = "/upload/"
+      const options = {
+        method: 'POST',
+        body: form,
+      };
+      fetch(url, options)
+        .then((response) => {
+          if (!response.ok) throw Error(response.statusText);
+          return response.json()
+        })
+        .then((data) => {
+          console.log("in data")
+          console.log(data)
+        })
+        .catch((error) => console.log(error));
     }
   };
 
@@ -58,8 +77,8 @@ export default function SectionBasics() {
         <div className={classes.title}>
           <h2>Automatic Wound Area Measurement</h2>
         </div>
-        <div class="row">
-          <div class="column">
+        <div className="row">
+          <div className="column">
             <div className='button' style={{flex: 1}}>
               <h3>Upload Image</h3>
               <input type="file" name="myImage" onChange={onImageChange} />
@@ -74,16 +93,16 @@ export default function SectionBasics() {
               />
             </div>
           </div>
-          <div class="column">
+          <div className="column">
             <h3>Image</h3>
-            <img src={currentImage} style={{width: "100%", flex: 1}} />
+            <img src={currentImage} style={{width: "100%", flex: 1}} alt="" />
           </div>
         </div>
         
         <h3>{testText}</h3>
         <p>The current time is {currentTime}.</p>
         
-        <Button color="primary" onClick={analyzeImage}>Measure area</Button>
+        <Button color="success" onClick={analyzeImage}>Measure area</Button>
       </div>
     </div>
   );
