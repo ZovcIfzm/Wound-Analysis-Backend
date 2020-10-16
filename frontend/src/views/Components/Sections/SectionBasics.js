@@ -16,6 +16,7 @@ const useStyles = makeStyles(styles);
 
 export default function SectionBasics() {
   const [currentImage, setCurrentImage] = useState();
+  const [currentImageFile, setCurrentImageFile] = useState();
   const [currentImageFilename, setCurrentImageFilename] = useState();
   const [analyzedUrl, setAnalyzedUrl] = useState(0);
   const [imageWidth, setImageWidth] = useState();
@@ -40,9 +41,15 @@ export default function SectionBasics() {
         croppedAreaPixels,
         rotation
       )
-      console.log('donee', { croppedImage })
       setCurrentImage(croppedImage)
       setUseCrop(false)
+
+      fetch(croppedImage).then(function(response) {
+        return response.blob();
+      }).then(function(myBlob) {
+        let sendFile = new File([myBlob], currentImageFilename, {type: "image/jpeg", lastModified: Date.now()});
+        uploadImage(sendFile)
+      })
     } catch (e) {
       console.error(e)
     }
@@ -57,39 +64,40 @@ export default function SectionBasics() {
 
   const onImageChange = event => {
     if (event.target.files && event.target.files[0]) {
-      let img = event.target.files[0];
-      
-      setCurrentImage(URL.createObjectURL(img));
-      
-      const form = new FormData();
-      form.append('file', img);
-      const url = "/upload/"
-      const options = {
-        method: 'POST',
-        body: form,
-      };
-      fetch(url, options)
-        .then((response) => {
-          if (!response.ok) throw Error(response.statusText);
-          return response.json()
-        })
-        .then((data) => {
-          console.log("currentImage: ", currentImage)
-          setCurrentImageFilename(data.filename)
-        })
-        .catch((error) => console.log(error));
+      let imgFile = event.target.files[0];
+      setCurrentImageFile(imgFile)
+      setCurrentImage(URL.createObjectURL(imgFile));
+      uploadImage(imgFile)      
     }
   };
+
+  const uploadImage = (imgFile) => {
+    console.log("Input to uploadImage: ", imgFile)
+    const form = new FormData();
+    form.append('file', imgFile);
+    const url = "/upload/"
+    const options = {
+      method: 'POST',
+      body: form,
+    };
+    fetch(url, options)
+      .then((response) => {
+        if (!response.ok) throw Error(response.statusText);
+        return response.json()
+      })
+      .then((data) => {
+        console.log("currentImage: ", currentImage)
+        setCurrentImageFilename(data.filename)
+      })
+      .catch((error) => console.log(error));
+  }
 
   const analyzeImage = async (event) => {
     event.preventDefault();
     if (currentImage && imageWidth) {
       const url = "/analyze/"
-      const form = new FormData();
-      let sendFile = new File([currentImage], currentImageFilename, {type: "image/jpeg", lastModified: Date.now()});
-      form.append('file', sendFile)
+      const form = new FormData();      
       form.append('filename', currentImageFilename);
-      console.log(sendFile)
       form.append('mode', "run")
       form.append("width", imageWidth)
       
