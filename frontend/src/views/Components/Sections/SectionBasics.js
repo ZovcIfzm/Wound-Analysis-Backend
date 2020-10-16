@@ -23,6 +23,7 @@ export default function SectionBasics() {
   const [useCrop, setUseCrop] = useState(0)
   const classes = useStyles();
   const [currentTime, setCurrentTime] = useState(0);
+  const [areas, setAreas] = useState([]);
 
   //For Cropper
   const [crop, setCrop] = useState({ x: 0, y: 0 })
@@ -72,7 +73,6 @@ export default function SectionBasics() {
   };
 
   const uploadImage = (imgFile) => {
-    console.log("Input to uploadImage: ", imgFile)
     const form = new FormData();
     form.append('file', imgFile);
     const url = "/upload/"
@@ -112,8 +112,8 @@ export default function SectionBasics() {
           return response.json()
         })
         .then((data) => {
-          console.log(`http://localhost:5000/uploads/${data.url}`)
           setAnalyzedUrl(`http://localhost:5000/uploads/${data.url}`)
+          setAreas(data.areas)
         })
         .catch((error) => console.log(error));
     }
@@ -204,7 +204,7 @@ export default function SectionBasics() {
                     value={rotation}
                     min={0}
                     max={360}
-                    step={0.1}
+                    step={0.01}
                     aria-labelledby="Rotation"
                     onChange={(e, rotation) => setRotation(rotation)}
                   />
@@ -230,8 +230,10 @@ export default function SectionBasics() {
             : null}
           </div>
         </div>
-        
-        <p>The current time is {currentTime}.</p>
+        <h3>Areas:</h3>
+        {
+           areas.map((value) => (<p>{value} u^2</p>))
+        }        
         
         <Button variant="contained" color="primary" onClick={analyzeImage}>Measure area</Button>
       </div>

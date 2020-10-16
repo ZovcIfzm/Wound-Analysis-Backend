@@ -65,7 +65,7 @@ def run_recog():
         #cv2.imwrite(const_img_url, data["drawn_image"])
         print("/analyze/, img_url: ", conv)
         #print("img url ok: ", const_img_url)
-        return {"url": conv}
+        return {"url": conv, "areas": data["areas"]}
 
     elif mode == "increase sat":
         width = float(flask.request.form.get("width"))
