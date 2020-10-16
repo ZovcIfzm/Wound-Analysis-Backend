@@ -7,6 +7,7 @@
   "dependencies": {
     "@material-ui/core": "4.10.0",
     "@material-ui/icons": "4.9.1",
+    "@material-ui/lab": "^4.0.0-alpha.56",
     "classnames": "2.2.6",
     "firebase": "^7.23.0",
     "history": "4.10.1",
@@ -17,6 +18,7 @@
     "react": "16.13.1",
     "react-datetime": "2.16.3",
     "react-dom": "16.13.1",
+    "react-easy-crop": "^3.2.1",
     "react-router-dom": "5.2.0",
     "react-scripts": "3.4.1",
     "react-slick": "0.26.1",

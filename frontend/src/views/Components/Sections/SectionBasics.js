@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
-// plugin that creates slider
-// @material-ui/core components
+import React, { useState, useEffect, useCallback} from 'react';
+import Cropper from 'react-easy-crop'
+import Slider from '@material-ui/core/Slider'
+import Button from '@material-ui/core/Button'
+import Typography from '@material-ui/core/Typography'
+import getCroppedImg from './cropImage'
+
 import { makeStyles } from "@material-ui/core/styles";
-// @material-ui/icons
-// core components
-import Button from "components/CustomButtons/Button.js";
+
 import CustomInput from "components/CustomInput/CustomInput.js";
+
 
 import styles from "assets/jss/material-kit-react/views/componentsSections/basicsStyle.js";
 import "./style.css";
@@ -16,11 +19,36 @@ export default function SectionBasics() {
   const [currentImageFilename, setCurrentImageFilename] = useState();
   const [analyzedUrl, setAnalyzedUrl] = useState(0);
   const [imageWidth, setImageWidth] = useState();
-  const [testText, setTestText] = useState("default");
+  const [useCrop, setUseCrop] = useState(0)
   const classes = useStyles();
-  
   const [currentTime, setCurrentTime] = useState(0);
 
+  //For Cropper
+  const [crop, setCrop] = useState({ x: 0, y: 0 })
+  const [rotation, setRotation] = useState(0)
+  const [zoom, setZoom] = useState(1)
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null)
+
+  const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
+    setCroppedAreaPixels(croppedAreaPixels)
+  }, [])
+
+  const showCroppedImage = useCallback(async () => {
+    try {
+      const croppedImage = await getCroppedImg(
+        currentImage,
+        croppedAreaPixels,
+        rotation
+      )
+      console.log('donee', { croppedImage })
+      setCurrentImage(croppedImage)
+      setUseCrop(false)
+    } catch (e) {
+      console.error(e)
+    }
+  }, [currentImage, croppedAreaPixels, rotation])
+
+  //Normal code
   useEffect(() => {
     fetch('/time/').then(res => res.json()).then(data => {
       setCurrentTime(data.time);
@@ -30,7 +58,9 @@ export default function SectionBasics() {
   const onImageChange = event => {
     if (event.target.files && event.target.files[0]) {
       let img = event.target.files[0];
+      
       setCurrentImage(URL.createObjectURL(img));
+      
       const form = new FormData();
       form.append('file', img);
       const url = "/upload/"
@@ -44,6 +74,7 @@ export default function SectionBasics() {
           return response.json()
         })
         .then((data) => {
+          console.log("currentImage: ", currentImage)
           setCurrentImageFilename(data.filename)
         })
         .catch((error) => console.log(error));
@@ -52,17 +83,22 @@ export default function SectionBasics() {
 
   const analyzeImage = async (event) => {
     event.preventDefault();
-    if (currentImageFilename && imageWidth) {
+    if (currentImage && imageWidth) {
       const url = "/analyze/"
       const form = new FormData();
+      let sendFile = new File([currentImage], currentImageFilename, {type: "image/jpeg", lastModified: Date.now()});
+      form.append('file', sendFile)
       form.append('filename', currentImageFilename);
+      console.log(sendFile)
       form.append('mode', "run")
       form.append("width", imageWidth)
-      const options = {
+      
+      //Then analyze
+      const analyze_options = {
         method: 'POST',
         body: form,
       };
-      fetch(url, options)
+      fetch(url, analyze_options)
         .then((response) => {
           if (!response.ok) throw Error(response.statusText);
           return response.json()
@@ -70,14 +106,13 @@ export default function SectionBasics() {
         .then((data) => {
           console.log(`http://localhost:5000/uploads/${data.url}`)
           setAnalyzedUrl(`http://localhost:5000/uploads/${data.url}`)
-          
         })
         .catch((error) => console.log(error));
     }
-    else if (currentImageFilename && !imageWidth) {
+    else if (currentImage && !imageWidth) {
       alert("Please specify an image width")
     }
-    else if (!currentImageFilename && imageWidth) {
+    else if (!currentImage && imageWidth) {
       alert("Please upload an image")
     }
     else{
@@ -116,19 +151,83 @@ export default function SectionBasics() {
           </div>
           <div className="column">
             <h3>Image</h3>
-            {currentImage && !analyzedUrl ? 
-            <img src={currentImage} style={{width: "100%", flex: 1}} alt="" />
+            {useCrop ? 
+            <div>
+              <div style={{position: 'relative',
+                width: '100%',
+                height: 200,
+                background: '#333',
+                }}>
+                <Cropper
+                  image={currentImage}
+                  crop={crop}
+                  rotation={rotation}
+                  zoom={zoom}
+                  aspect={3 / 3}
+                  onCropChange={setCrop}
+                  onRotationChange={setRotation}
+                  onCropComplete={onCropComplete}
+                  onZoomChange={setZoom}
+                />
+              </div>
+              <div>
+                <div>
+                  <Typography
+                    variant="overline"
+                  >
+                    Zoom
+                  </Typography>
+                  <Slider
+                    value={zoom}
+                    min={1}
+                    max={3}
+                    step={0.01}
+                    aria-labelledby="Zoom"
+                    onChange={(e, zoom) => setZoom(zoom)}
+                  />
+                </div>
+                <div>
+                  <Typography
+                    variant="overline"
+                  >
+                    Rotation
+                  </Typography>
+                  <Slider
+                    value={rotation}
+                    min={0}
+                    max={360}
+                    step={0.1}
+                    aria-labelledby="Rotation"
+                    onChange={(e, rotation) => setRotation(rotation)}
+                  />
+                </div>
+                <Button
+                  onClick={showCroppedImage}
+                  variant="contained"
+                  color="primary"
+                >
+                  Crop Image
+                </Button>
+              </div>
+            </div>
+            : currentImage && !analyzedUrl ? 
+            
+            <div>
+              <img src={currentImage} style={{width: "100%", flex: 1}} alt="" />
+              <Button variant="contained" color="primary" onClick={() => setUseCrop(true)}>Crop Image</Button>
+            </div>
+            
             : analyzedUrl ? 
-            <img src={analyzedUrl} style={{width: "100%", flex: 1}} alt="" />
+              <img src={analyzedUrl} style={{width: "100%", flex: 1}} alt="" />
             : null}
           </div>
         </div>
         
-        <h3>{testText}</h3>
         <p>The current time is {currentTime}.</p>
         
-        <Button color="success" onClick={analyzeImage}>Measure area</Button>
+        <Button variant="contained" color="primary" onClick={analyzeImage}>Measure area</Button>
       </div>
     </div>
   );
 }
+
