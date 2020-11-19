@@ -33,7 +33,17 @@ def measurement(image, sq_ratio, lower_range, upper_range):
     cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL,
                             cv2.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
-    (cnts, _) = contours.sort_contours(cnts)
+    try:
+        (cnts, _) = contours.sort_contours(cnts)
+    except:
+        return {"drawn_image": overlay_img,
+            "areas": [],
+            "lower_range": lower_range,
+            "upper_range": upper_range,
+            "original_image": image,
+            "sq_ratio": sq_ratio,
+            "error": False}
+        
     
     areas = measure_area(cnts, sq_ratio)
     display_image(edged)
