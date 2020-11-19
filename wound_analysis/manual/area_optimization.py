@@ -26,13 +26,15 @@ def measurement(image, sq_ratio, lower_range, upper_range):
     _image = apply_mask(lower_range, upper_range, _image)
     gray = cv2.cvtColor(_image, cv2.COLOR_BGR2GRAY)
     edged = cv2.Canny(gray, 50, 100)
-    edged = cv2.dilate(edged, None, iterations=5)
-    edged = cv2.erode(edged, None, iterations=4)
+    edged = cv2.dilate(edged, None, iterations=9)
+    edged = cv2.erode(edged, None, iterations=7)
     
     edged = cv2.dilate(edged, None, iterations=1)
     cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL,
                             cv2.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
+    (cnts, _) = contours.sort_contours(cnts)
+    
     areas = measure_area(cnts, sq_ratio)
     display_image(edged)
 

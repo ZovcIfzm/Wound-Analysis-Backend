@@ -40,5 +40,5 @@ def measure_area(contours, sq_ratio):
             continue
 
         areas.append(cont_area)
-    areas.sort()
+    #areas.sort()
     return areas
