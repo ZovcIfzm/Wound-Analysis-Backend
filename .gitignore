@@ -130,5 +130,5 @@ dmypy.json
 
 
 # Manual
-LabImages/
 uploads/
+resources/
