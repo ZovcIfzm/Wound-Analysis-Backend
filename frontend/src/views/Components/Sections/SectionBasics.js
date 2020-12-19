@@ -232,7 +232,7 @@ export default function SectionBasics() {
         </div>
         <h3>Areas:</h3>
         {
-           areas.map((value) => (<p>{value} u^2</p>))
+          areas.map((value) => (<p>{value} u^2</p>))
         }        
         
         <Button variant="contained" color="primary" onClick={analyzeImage}>Measure area</Button>

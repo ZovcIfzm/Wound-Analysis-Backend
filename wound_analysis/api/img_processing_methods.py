@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from scipy.spatial import distance as dist
 
-from constants import AREA_LOWER_LIMIT
+from wound_analysis.api.constants import AREA_LOWER_LIMIT
 
 
 def midpoint(ptA, ptB):
