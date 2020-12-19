@@ -18,7 +18,7 @@ export default function SectionBasics() {
   const [currentImage, setCurrentImage] = useState();
   const [currentImageFile, setCurrentImageFile] = useState();
   const [currentImageFilename, setCurrentImageFilename] = useState();
-  const [analyzedUrl, setAnalyzedUrl] = useState(0);
+  const [analyzed, setAnalyzed] = useState(0);
   const [imageWidth, setImageWidth] = useState();
   const [useCrop, setUseCrop] = useState(0)
   const classes = useStyles();
@@ -44,13 +44,13 @@ export default function SectionBasics() {
       )
       setCurrentImage(croppedImage)
       setUseCrop(false)
-
+      /*
       fetch(croppedImage).then(function(response) {
         return response.blob();
       }).then(function(myBlob) {
         let sendFile = new File([myBlob], currentImageFilename, {type: "image/jpeg", lastModified: Date.now()});
         uploadImage(sendFile)
-      })
+      })*/
     } catch (e) {
       console.error(e)
     }
@@ -68,36 +68,16 @@ export default function SectionBasics() {
       let imgFile = event.target.files[0];
       setCurrentImageFile(imgFile)
       setCurrentImage(URL.createObjectURL(imgFile));
-      uploadImage(imgFile)      
     }
   };
-
-  const uploadImage = (imgFile) => {
-    const form = new FormData();
-    form.append('file', imgFile);
-    const url = "/upload/"
-    const options = {
-      method: 'POST',
-      body: form,
-    };
-    fetch(url, options)
-      .then((response) => {
-        if (!response.ok) throw Error(response.statusText);
-        return response.json()
-      })
-      .then((data) => {
-        console.log("currentImage: ", currentImage)
-        setCurrentImageFilename(data.filename)
-      })
-      .catch((error) => console.log(error));
-  }
 
   const analyzeImage = async (event) => {
     event.preventDefault();
     if (currentImage && imageWidth) {
       const url = "/analyze/"
       const form = new FormData();      
-      form.append('filename', currentImageFilename);
+      console.log("currentImageFile: ", currentImageFile)
+      form.append('file', currentImageFile);
       form.append('mode', "run")
       form.append("width", imageWidth)
       
@@ -112,7 +92,10 @@ export default function SectionBasics() {
           return response.json()
         })
         .then((data) => {
-          setAnalyzedUrl(`http://localhost:5000/uploads/${data.url}`)
+          //setAnalyzedUrl(`http://localhost:5000/uploads/${data.url}`)
+          console.log("analyzed: ", data["drawn_image"])
+          setAnalyzed(true)
+          setCurrentImage(data["drawn_image"])
           setAreas(data.areas)
         })
         .catch((error) => console.log(error));
@@ -218,15 +201,15 @@ export default function SectionBasics() {
                 </Button>
               </div>
             </div>
-            : currentImage && !analyzedUrl ? 
+            : currentImage && !analyzed ? 
             
             <div>
               <img src={currentImage} style={{width: "100%", flex: 1}} alt="" />
               <Button variant="contained" color="primary" onClick={() => setUseCrop(true)}>Crop Image</Button>
             </div>
             
-            : analyzedUrl ? 
-              <img src={analyzedUrl} style={{width: "100%", flex: 1}} alt="" />
+            : analyzed ? 
+            <img src={"data:image/png;base64," +  currentImage} style={{width: "100%", flex: 1}} alt="" />
             : null}
           </div>
         </div>
