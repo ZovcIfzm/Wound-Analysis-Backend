@@ -6,11 +6,11 @@ from imutils import perspective
 from imutils import contours
 
 # Function imports
-from wound_analysis.api.img_processing_methods import apply_mask, sharpen, blur, measure_area
-from wound_analysis.api.helper import find_sq_ratio, display_image, draw_contours, display_overlay
+from img_processing_methods import apply_mask, sharpen, blur, measure_area
+from helper import find_sq_ratio, display_image, draw_contours, display_overlay
 
 # Constants import
-from wound_analysis.api.constants import DEF_LOWER_RANGE, DEF_UPPER_RANGE, AREA_UPPER_LIMIT
+from constants import DEF_LOWER_RANGE, DEF_UPPER_RANGE, AREA_UPPER_LIMIT
 
 
 def default_measurement(image, real_width):
@@ -26,11 +26,25 @@ def measurement(image, sq_ratio, lower_range, upper_range):
     _image = apply_mask(lower_range, upper_range, _image)
     gray = cv2.cvtColor(_image, cv2.COLOR_BGR2GRAY)
     edged = cv2.Canny(gray, 50, 100)
-    edged = cv2.dilate(edged, None, iterations=3)
-    edged = cv2.erode(edged, None, iterations=3)
+    edged = cv2.dilate(edged, None, iterations=9)
+    edged = cv2.erode(edged, None, iterations=7)
+    
+    edged = cv2.dilate(edged, None, iterations=1)
     cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL,
                             cv2.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
+    try:
+        (cnts, _) = contours.sort_contours(cnts)
+    except:
+        return {"drawn_image": overlay_img,
+            "areas": [],
+            "lower_range": lower_range,
+            "upper_range": upper_range,
+            "original_image": image,
+            "sq_ratio": sq_ratio,
+            "error": False}
+        
+    
     areas = measure_area(cnts, sq_ratio)
     display_image(edged)
 
@@ -61,7 +75,7 @@ def optimized_masking_measurement(image, real_width):
             print("decreasing num")
         else:
             break
-
+        
     if data is not {}:
         return {"drawn_image": data["drawn_image"],
                 "areas": areas,

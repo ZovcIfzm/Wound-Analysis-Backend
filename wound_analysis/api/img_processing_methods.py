@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from scipy.spatial import distance as dist
 
-from wound_analysis.api.constants import AREA_LOWER_LIMIT
+from constants import AREA_LOWER_LIMIT
 
 
 def midpoint(ptA, ptB):
@@ -40,5 +40,5 @@ def measure_area(contours, sq_ratio):
             continue
 
         areas.append(cont_area)
-    areas.sort()
+    #areas.sort()
     return areas
