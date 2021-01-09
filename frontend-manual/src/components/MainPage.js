@@ -1,9 +1,6 @@
-import React, { useState, useEffect, useCallback } from "react";
-import Cropper from "react-easy-crop";
-import Slider from "@material-ui/core/Slider";
+import React, { useState } from "react";
+import Cropper from "./imageCropper";
 import Button from "@material-ui/core/Button";
-import Typography from "@material-ui/core/Typography";
-import getCroppedImg from "./cropImage";
 
 import CustomInput from "components/CustomInput/CustomInput.js";
 import styles from "./style.js";
@@ -16,31 +13,13 @@ export default function App() {
   const [useCrop, setUseCrop] = useState(0);
   const [areas, setAreas] = useState([]);
 
-  //For Cropper
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [rotation, setRotation] = useState(0);
-  const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
-
-  const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
-    setCroppedAreaPixels(croppedAreaPixels);
-  }, []);
-
-  const showCroppedImage = useCallback(async () => {
-    try {
-      const croppedImage = await getCroppedImg(
-        currentImage,
-        croppedAreaPixels,
-        rotation
-      );
-      setCurrentImage(croppedImage);
-      setUseCrop(false);
-    } catch (e) {
-      console.error(e);
-    }
-  }, [currentImage, croppedAreaPixels, rotation]);
+  const completeCrop = (image) => {
+    setUseCrop(false);
+    setCurrentImage(image);
+  };
 
   const onImageChange = (event) => {
+    console.log("image changed");
     if (event.target.files && event.target.files[0]) {
       let imgFile = event.target.files[0];
       setCurrentImageFile(imgFile);
@@ -116,59 +95,10 @@ export default function App() {
           <div className={styles.column}>
             <h3>Image</h3>
             {useCrop ? (
-              <div>
-                <div
-                  style={{
-                    position: "relative",
-                    width: "100%",
-                    height: 200,
-                    background: "#333",
-                  }}
-                >
-                  <Cropper
-                    image={currentImage}
-                    crop={crop}
-                    rotation={rotation}
-                    zoom={zoom}
-                    aspect={3 / 3}
-                    onCropChange={setCrop}
-                    onRotationChange={setRotation}
-                    onCropComplete={onCropComplete}
-                    onZoomChange={setZoom}
-                  />
-                </div>
-                <div>
-                  <div>
-                    <Typography variant="overline">Zoom</Typography>
-                    <Slider
-                      value={zoom}
-                      min={1}
-                      max={3}
-                      step={0.01}
-                      aria-labelledby="Zoom"
-                      onChange={(e, zoom) => setZoom(zoom)}
-                    />
-                  </div>
-                  <div>
-                    <Typography variant="overline">Rotation</Typography>
-                    <Slider
-                      value={rotation}
-                      min={0}
-                      max={360}
-                      step={0.01}
-                      aria-labelledby="Rotation"
-                      onChange={(e, rotation) => setRotation(rotation)}
-                    />
-                  </div>
-                  <Button
-                    onClick={showCroppedImage}
-                    variant="contained"
-                    color="primary"
-                  >
-                    Crop Image
-                  </Button>
-                </div>
-              </div>
+              <Cropper
+                currentImage={currentImage}
+                completeCrop={completeCrop}
+              />
             ) : currentImage && !analyzed ? (
               <div>
                 <img
