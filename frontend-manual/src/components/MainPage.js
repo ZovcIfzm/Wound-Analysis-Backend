@@ -107,8 +107,9 @@ export default function MainPage() {
                 />
               ) : currentImage && !analyzed ? (
                 <div className={styles.column}>
-                  <img src={currentImage} className={styles.test} alt="" />
+                  <img src={currentImage} className={styles.images} alt="" />
                   <Button
+                    className={styles.cropButton}
                     variant="contained"
                     color="primary"
                     onClick={() => setUseCrop(true)}
@@ -119,7 +120,7 @@ export default function MainPage() {
               ) : analyzed ? (
                 <img
                   src={"data:image/png;base64," + currentImage}
-                  style={{ width: 200 }}
+                  className={styles.images}
                   alt=""
                 />
               ) : null}

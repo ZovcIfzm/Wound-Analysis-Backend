@@ -1,9 +1,11 @@
 const styles = {
   row: {
+    display: "flex",
     flex: 1,
     flexDirection: "row",
   },
   column: {
+    display: "flex",
     flex: 1,
     flexDirection: "column",
   },
@@ -13,9 +15,6 @@ const styles = {
   },
   sections: {
     padding: "70px 0",
-  },
-  test: {
-    width: 20,
   },
   container: {
     paddingRight: "15px",
@@ -58,11 +57,26 @@ const styles = {
     zIndex: "3",
     fontFamily: `"Roboto Slab", "Times New Roman", serif`,
   },
+
   mainRaised: {
     margin: "-60px 30px 0px",
     borderRadius: "6px",
     boxShadow:
       "0 16px 24px 2px rgba(0, 0, 0, 0.14), 0 6px 30px 5px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2)",
+  },
+
+  images: {
+    display: "flex",
+    flex: 1,
+    width: "70%",
+    alignSelf: "center",
+  },
+
+  cropButton: {
+    display: "flex",
+    flex: 1,
+    width: "50%",
+    alignSelf: "center",
   },
 };
 
