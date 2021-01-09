@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 
 import Cropper from "react-easy-crop";
-import getCroppedImg from "./cropImage";
+import getCroppedImg from "./imageCropperHelper";
 
 import Slider from "@material-ui/core/Slider";
 import Typography from "@material-ui/core/Typography";

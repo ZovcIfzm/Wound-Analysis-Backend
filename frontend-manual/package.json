@@ -14,7 +14,8 @@
     "react-easy-crop": "^3.3.1",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "3.4.3"
+    "react-scripts": "3.4.3",
+    "typeface-roboto-slab": "^1.1.13"
   },
   "scripts": {
     "start": "react-scripts start",

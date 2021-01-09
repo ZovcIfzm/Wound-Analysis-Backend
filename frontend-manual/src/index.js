@@ -1,13 +1,17 @@
 // You can choose your kind of history here (e.g. browserHistory)
 import React from "react";
 import ReactDOM from "react-dom";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
+
+import MainPage from "./components/MainPage";
+require("typeface-roboto-slab");
 // Your routes.js file
-import App from "./App";
 
 ReactDOM.render(
   <BrowserRouter>
-    <App />
+    <Switch>
+      <Route path="/" component={MainPage} exact />
+    </Switch>
   </BrowserRouter>,
   document.getElementById("root")
 );
