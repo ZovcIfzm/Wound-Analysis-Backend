@@ -1,17 +1,17 @@
 const styles = {
   row: {
     flex: 1,
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   column: {
     flex: 1,
-    flexDirection: 'column',
+    flexDirection: "column",
   },
   cropperContainer: {
     width: 50,
     height: 50,
   },
   sections: {
-    padding: "70px 0"
-  }
+    padding: "70px 0",
+  },
 };
