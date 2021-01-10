@@ -28,7 +28,17 @@ export default function CustomCropper(props) {
         croppedAreaPixels,
         rotation
       );
-      completeCrop(croppedImage);
+      fetch(croppedImage)
+        .then(function (response) {
+          return response.blob();
+        })
+        .then(function (myBlob) {
+          let croppedImageFile = new File([myBlob], "image", {
+            type: "image/jpeg",
+            lastModified: Date.now(),
+          });
+          completeCrop(croppedImage, croppedImageFile);
+        });
     } catch (e) {
       console.error(e);
     }

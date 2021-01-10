@@ -3,43 +3,53 @@ import Cropper from "./ImageCropper/imageCropper";
 import Button from "@material-ui/core/Button";
 
 import CustomInput from "components/CustomInput/CustomInput.js";
-import style from "./style.js";
+import styles from "./style.js";
 import classNames from "classnames";
-import { makeStyles } from "@material-ui/core/styles";
-const useStyles = makeStyles(style);
+import { withStyles } from "@material-ui/core/styles";
 
-export default function MainPage() {
-  const [currentImage, setCurrentImage] = useState();
-  const [currentImageFile, setCurrentImageFile] = useState();
-  const [analyzed, setAnalyzed] = useState(0);
-  const [imageWidth, setImageWidth] = useState();
-  const [useCrop, setUseCrop] = useState(0);
-  const [areas, setAreas] = useState([]);
+import MaskSelector from "./MaskSelector/index.js";
 
-  const styles = useStyles();
-
-  const completeCrop = (image) => {
-    setUseCrop(false);
-    setCurrentImage(image);
+class MainPage extends React.Component {
+  state = {
+    currentImage: null,
+    currentImageFile: null,
+    analyzed: false,
+    imageWidth: null,
+    useCrop: false,
+    areas: [],
+    lowerMask: null,
+    uppperMask: null,
   };
 
-  const onImageChange = (event) => {
+  completeCrop = (image, imageFile) => {
+    this.setState({
+      useCrop: false,
+      currentImage: image,
+      currentImageFile: imageFile,
+    });
+  };
+
+  onImageChange = (event) => {
     console.log("image changed");
     if (event.target.files && event.target.files[0]) {
       let imgFile = event.target.files[0];
-      setCurrentImageFile(imgFile);
-      setCurrentImage(URL.createObjectURL(imgFile));
+      this.setState({
+        currentImage: URL.createObjectURL(imgFile),
+        currentImageFile: imgFile,
+      });
     }
   };
 
-  const analyzeImage = async (event) => {
+  analyzeImage = async (event) => {
     event.preventDefault();
-    if (currentImage && imageWidth) {
+    if (this.state.currentImage && this.state.imageWidth) {
       const url = "/analyze/";
       const form = new FormData();
-      form.append("file", currentImageFile);
+      console.log("analyzeImage");
+      console.log(this.state.currentImageFile);
+      form.append("file", this.state.currentImageFile);
       form.append("mode", "run");
-      form.append("width", imageWidth);
+      form.append("width", this.state.imageWidth);
 
       //Then analyze
       const analyze_options = {
@@ -54,36 +64,61 @@ export default function MainPage() {
         .then((data) => {
           //setAnalyzedUrl(`http://localhost:5000/uploads/${data.url}`)
           console.log("analyzed: ", data["drawn_image"]);
-          setAnalyzed(true);
-          setCurrentImage(data["drawn_image"]);
-          setAreas(data.areas);
+          this.setState({
+            analyzed: true,
+            currentImage: data["drawn_image"],
+            areas: data.areas,
+          });
         })
         .catch((error) => console.log(error));
-    } else if (currentImage && !imageWidth) {
+    } else if (this.state.currentImage && !this.state.imageWidth) {
       alert("Please specify an image width");
-    } else if (!currentImage && imageWidth) {
+    } else if (!this.state.currentImage && this.state.imageWidth) {
       alert("Please upload an image");
     } else {
       alert("Please upload an image and specify it's real width");
     }
   };
 
-  const handleOnChange = (event) => {
-    setImageWidth(event.target.value);
+  handleOnChange = (event) => {
+    this.setState({
+      imageWidth: event.target.value,
+    });
   };
 
-  return (
-    <div className={classNames(styles.main, styles.mainRaised)}>
-      <div className={styles.sections}>
-        <div className={styles.container}>
-          <div className={styles.title}>
+  handleCropChange = () => {
+    this.setState({
+      useCrop: true,
+    });
+  };
+
+  handleLowerMaskChange = (lowerMask) => {
+    this.setState({
+      lowerMask: lowerMask,
+    });
+  };
+
+  render() {
+    const { classes } = this.props;
+    return (
+      <div className={classNames(classes.main, classes.mainRaised)}>
+        <div className={classes.container}>
+          <MaskSelector
+            valueLower={this.state.lowerMask}
+            onChangeLower={this.handleLowerMaskChange}
+          />
+          <div className={classes.title}>
             <h2>Automatic Wound Area Measurement</h2>
           </div>
-          <div className={styles.row}>
-            <div className={styles.column}>
-              <div className={styles.button} style={{ flex: 1 }}>
+          <div className={classes.row}>
+            <div className={classes.column}>
+              <div className={classes.button} style={{ flex: 1 }}>
                 <h3>Upload Image</h3>
-                <input type="file" name="myImage" onChange={onImageChange} />
+                <input
+                  type="file"
+                  name="myImage"
+                  onChange={this.onImageChange}
+                />
               </div>
               <div style={{ width: "25%", flex: 1 }}>
                 <CustomInput
@@ -93,49 +128,59 @@ export default function MainPage() {
                     fullWidth: true,
                   }}
                   inputProps={{
-                    onChange: handleOnChange,
+                    onChange: this.handleOnChange,
                   }}
                 />
               </div>
             </div>
-            <div className={styles.column}>
+            <div className={classes.column}>
               <h3>Image</h3>
-              {useCrop ? (
+              {this.state.useCrop ? (
                 <Cropper
-                  currentImage={currentImage}
-                  completeCrop={completeCrop}
+                  currentImage={this.state.currentImage}
+                  completeCrop={this.completeCrop}
                 />
-              ) : currentImage && !analyzed ? (
-                <div className={styles.column}>
-                  <img src={currentImage} className={styles.images} alt="" />
+              ) : this.state.currentImage && !this.state.analyzed ? (
+                <div className={classes.column}>
+                  <img
+                    src={this.state.currentImage}
+                    className={classes.images}
+                    alt=""
+                  />
                   <Button
-                    className={styles.cropButton}
+                    className={classes.cropButton}
                     variant="contained"
                     color="primary"
-                    onClick={() => setUseCrop(true)}
+                    onClick={this.handleCropChange}
                   >
                     Crop Image
                   </Button>
                 </div>
-              ) : analyzed ? (
+              ) : this.state.analyzed ? (
                 <img
-                  src={"data:image/png;base64," + currentImage}
-                  className={styles.images}
+                  src={"data:image/png;base64," + this.state.currentImage}
+                  className={classes.images}
                   alt=""
                 />
               ) : null}
             </div>
           </div>
           <h3>Areas:</h3>
-          {areas.map((value) => (
+          {this.state.areas.map((value) => (
             <p>{value} u^2</p>
           ))}
 
-          <Button variant="contained" color="primary" onClick={analyzeImage}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={this.analyzeImage}
+          >
             Measure area
           </Button>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
 }
+
+export default withStyles(styles)(MainPage);

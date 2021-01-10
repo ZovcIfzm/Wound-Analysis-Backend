@@ -16,6 +16,8 @@ import wound_analysis
 from PIL import Image
 import pickle
 
+import wound_analysis.api.area_optimization as analysis
+
 from wound_analysis.api.area_optimization import default_measurement, optimized_masking_measurement, manual_area_adjustment
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
 # called `app` in `main.py`.
@@ -24,10 +26,6 @@ global test_val
 test_val = 0
 global data
 data = {}
-
-
-wound_analysis.app.secret_key = \
-    b't\xc7\xe7\xbd(P1+\xb77]\xc1\xf4H\\\xd0\x8b.\r+|g\x8a\x83'
 
 @wound_analysis.app.route('/time/')
 def get_current_time():
@@ -50,15 +48,41 @@ def show_time():
     return {"test": "testedInFlask"}
 
 
+@wound_analysis.app.route('/measure', methods=['POST', 'GET'])
+def measure():
+    global data
+    global test_val
+    
+    #mode = flask.request.form.get("mode")
+    #venue_id = flask.request.args.get("venue_id")
+    mask = flask.request.form.get("mask")
+    fileobj = flask.request.files["file"]
+    filename = fileobj.filename
+
+    pil_image = Image.open(fileobj).convert('RGB') 
+    opencv_image = np.array(pil_image) 
+
+    # Convert RGB to BGR 
+    opencv_image = opencv_image[:, :, ::-1].copy() 
+
+    width = float(flask.request.form.get("width"))
+    data = analysis.custom_measure(opencv_image, width, mask)
+    _, im_arr = cv2.imencode('.jpg', data["drawn_image"])  # im_arr: image in Numpy one-dim array format.
+    base64_bytes = base64.b64encode(im_arr)
+    jpg_as_string = base64_bytes.decode('utf-8')
+    drawn_image = jpg_as_string
+
+    response = json.dumps({"drawn_image": drawn_image, "areas": data["areas"]})
+    return response
+
+
+
 @wound_analysis.app.route('/analyze/', methods=['POST', 'GET'])
 def run_recog():
     global data
     global test_val
-    #filename = flask.request.form.get("filename")
     mode = flask.request.form.get("mode")
-    #img_url = str(wound_analysis.app.config["UPLOAD_FOLDER"]/filename)
-    #const_img_url = str(wound_analysis.app.config["UPLOAD_FOLDER"]/"analyzed.png")
-
+    
     fileobj = flask.request.files["file"]
     print("fileobj: ", fileobj)
     filename = fileobj.filename
@@ -72,24 +96,10 @@ def run_recog():
         width = float(flask.request.form.get("width"))
         image = opencv_image
         data = optimized_masking_measurement(image, width)
-        #conv = "conv_" + filename
-        #conv_img_url = str(wound_analysis.app.config["UPLOAD_FOLDER"]/conv)
-        #cv2.imwrite(conv_img_url, data["drawn_image"])
-        #cv2.imwrite(const_img_url, data["drawn_image"])
-        print("/analyze/, data ", data)
-        
-        # Convert BGR to RGB
-        #rgb_image = data["drawn_image"][:, :, ::-1].copy() 
-        #image_file = Image.fromarray(rgb_image, 'RGB')
-        #drawn_image = pickle.dumps(data["drawn_image"])
-        
         _, im_arr = cv2.imencode('.jpg', data["drawn_image"])  # im_arr: image in Numpy one-dim array format.
-        #im_bytes = im_arr.tobytes()
         base64_bytes = base64.b64encode(im_arr)
         jpg_as_string = base64_bytes.decode('utf-8')
-        #print(jpg_as_string[:80])
         drawn_image = jpg_as_string
-        #im_b64 = base64.b64encode(im_bytes)
 
         response = json.dumps({"drawn_image": drawn_image, "areas": data["areas"]})
         return response

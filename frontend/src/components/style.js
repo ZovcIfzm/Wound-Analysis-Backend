@@ -13,12 +13,8 @@ const styles = {
     width: 50,
     height: 50,
   },
-  sections: {
-    padding: "70px 0",
-  },
   container: {
-    paddingRight: "15px",
-    paddingLeft: "15px",
+    padding: "15px",
     marginRight: "auto",
     marginLeft: "auto",
     width: "100%",
@@ -46,9 +42,8 @@ const styles = {
     textDecoration: "none",
     fontWeight: "700",
     fontFamily: `"Roboto Slab", "Times New Roman", serif`,
-    marginTop: "30px",
+    marginTop: "0",
     minHeight: "32px",
-    textDecoration: "none",
   },
 
   main: {
@@ -59,7 +54,7 @@ const styles = {
   },
 
   mainRaised: {
-    margin: "-60px 30px 0px",
+    margin: "0px 30px 0px",
     borderRadius: "6px",
     boxShadow:
       "0 16px 24px 2px rgba(0, 0, 0, 0.14), 0 6px 30px 5px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2)",

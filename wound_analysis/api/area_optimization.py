@@ -87,6 +87,34 @@ def optimized_masking_measurement(image, real_width):
     else:
         return {"error": True}
 
+def custom_area_measurement(image, real_width, mask):
+    cur_lower_range = [np.array(mask["lower_range"]["first"]), np.array(mask["lower_range"]["second"])]
+    cur_upper_range = [np.array(mask["upper_range"]["first"]), np.array(mask["upper_range"]["second"])]
+    sq_ratio = find_sq_ratio(image, real_width)
+    for i in range(10):
+        data = measurement(image, sq_ratio, cur_lower_range, cur_upper_range)
+        areas = data["areas"]
+        if areas == []:
+            cur_lower_range[0][1] *= 0.9
+            cur_lower_range[1][1] *= 0.9
+            print("increasing num")
+        elif areas[len(areas)-1] > AREA_UPPER_LIMIT:
+            cur_lower_range[0][1] *= 1.1
+            cur_lower_range[1][1] *= 1.1
+            print("decreasing num")
+        else:
+            break
+        
+    if data is not {}:
+        return {"drawn_image": data["drawn_image"],
+                "areas": areas,
+                "lower_range": cur_lower_range,
+                "upper_range": cur_upper_range,
+                "original_image": image,
+                "sq_ratio": sq_ratio,
+                "error": False}
+    else:
+        return {"error": True}
 
 def manual_area_adjustment(prev_data, increase_sat):
 
