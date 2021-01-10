@@ -1,20 +1,17 @@
+// You can choose your kind of history here (e.g. browserHistory)
 import React from "react";
 import ReactDOM from "react-dom";
-import { createBrowserHistory } from "history";
-import { Router, Route, Switch } from "react-router-dom";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
 
-import "assets/scss/material-kit-react.scss?v=1.9.0";
-
-// pages for this product
-import Components from "views/Components/Components.js";
-
-var hist = createBrowserHistory();
+import MainPage from "./components/MainPage";
+require("typeface-roboto-slab");
+// Your routes.js file
 
 ReactDOM.render(
-  <Router history={hist}>
+  <BrowserRouter>
     <Switch>
-      <Route path="/" component={Components} />
+      <Route path="/" component={MainPage} exact />
     </Switch>
-  </Router>,
+  </BrowserRouter>,
   document.getElementById("root")
 );
