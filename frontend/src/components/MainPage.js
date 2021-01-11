@@ -21,7 +21,7 @@ class MainPage extends React.Component {
     lowerMaskOne: "0, 100, 20",
     lowerMaskTwo: "150, 100, 20",
     upperMaskOne: "30, 255, 177",
-    upperMaskTwo: "180, 255, 17",
+    upperMaskTwo: "180, 255, 177",
   };
 
   completeCrop = (image, imageFile) => {

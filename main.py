@@ -1,1 +1,0 @@
-from wound_analysis import app
