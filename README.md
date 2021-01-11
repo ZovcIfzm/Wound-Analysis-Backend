@@ -11,6 +11,6 @@ The api will be running on localhost:5000
 
 ### Example images of interface and analysis
 
-<img src="https://github.com/ZovcIfzm/Wound-Analysis/blob/master/readme-imgs/readme1.jpg" width="720">  
-<img src="https://github.com/ZovcIfzm/Wound-Analysis/blob/master/readme-imgs/readme2.jpg" width="720">  
-<img src="https://github.com/ZovcIfzm/Wound-Analysis/blob/master/readme-imgs/readme3.jpg" width="720">
+<img src="https://github.com/ZovcIfzm/Wound-Analysis-Backend/blob/master/readme-imgs/readme1.jpg" width="720">  
+<img src="https://github.com/ZovcIfzm/Wound-Analysis-Backend/blob/master/readme-imgs/readme2.jpg" width="720">  
+<img src="https://github.com/ZovcIfzm/Wound-Analysis-Backend/blob/master/readme-imgs/readme3.jpg" width="720">
