@@ -47,26 +47,48 @@ def show_time():
     print("tested")
     return {"test": "testedInFlask"}
 
+def convertStringToNumpyArray(mask_string):
+    string_list = list(mask_string.split(','))
+    print(string_list)
+    number_list = [int(str) for str in string_list]
+    numpy = np.array(number_list)
+    return numpy
+
 
 @wound_analysis.app.route('/measure', methods=['POST', 'GET'])
 def measure():
     global data
     global test_val
-    
-    #mode = flask.request.form.get("mode")
-    #venue_id = flask.request.args.get("venue_id")
-    mask = flask.request.form.get("mask")
+
+    # Retrieve fields
+    width = float(flask.request.form.get("width"))
     fileobj = flask.request.files["file"]
     filename = fileobj.filename
+    lower_mask_one = str(flask.request.form.get("lower_mask_one"))
+    lower_mask_two = str(flask.request.form.get("lower_mask_two"))
+    upper_mask_one = str(flask.request.form.get("upper_mask_one"))
+    upper_mask_two = str(flask.request.form.get("upper_mask_two"))
+    mask_map = {
+        "lower_range": {
+            "first": convertStringToNumpyArray(lower_mask_one),
+            "second": convertStringToNumpyArray(lower_mask_two)
+        },
+        "upper_range": {
+            "first": convertStringToNumpyArray(upper_mask_one),
+            "second": convertStringToNumpyArray(upper_mask_two)
+        }
+    }
+    print("mask_map: ", mask_map)
 
+    # Convert image file to opencv format
     pil_image = Image.open(fileobj).convert('RGB') 
     opencv_image = np.array(pil_image) 
 
     # Convert RGB to BGR 
     opencv_image = opencv_image[:, :, ::-1].copy() 
+    data = analysis.custom_measure(opencv_image, width, mask_map)
 
-    width = float(flask.request.form.get("width"))
-    data = analysis.custom_measure(opencv_image, width, mask)
+    # Convert drawn image to base64 string
     _, im_arr = cv2.imencode('.jpg', data["drawn_image"])  # im_arr: image in Numpy one-dim array format.
     base64_bytes = base64.b64encode(im_arr)
     jpg_as_string = base64_bytes.decode('utf-8')
@@ -74,8 +96,6 @@ def measure():
 
     response = json.dumps({"drawn_image": drawn_image, "areas": data["areas"]})
     return response
-
-
 
 @wound_analysis.app.route('/analyze/', methods=['POST', 'GET'])
 def run_recog():

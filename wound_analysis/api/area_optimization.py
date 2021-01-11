@@ -87,7 +87,7 @@ def optimized_masking_measurement(image, real_width):
     else:
         return {"error": True}
 
-def custom_area_measurement(image, real_width, mask):
+def custom_measure(image, real_width, mask):
     cur_lower_range = [np.array(mask["lower_range"]["first"]), np.array(mask["lower_range"]["second"])]
     cur_upper_range = [np.array(mask["upper_range"]["first"]), np.array(mask["upper_range"]["second"])]
     sq_ratio = find_sq_ratio(image, real_width)

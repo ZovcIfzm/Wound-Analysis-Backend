@@ -8,24 +8,63 @@ const useStyles = makeStyles(style);
 
 function MaskSelector(props) {
   const classes = useStyles();
+  const placeholder = "hue, sat, val";
   return (
-    <div>
-      <TextField
-        label="Lower Range"
-        className={classes.textField}
-        valueLower={props.lowerMask}
-        placeholder={"10,10,10"}
-        onChange={props.onChangeLower}
-        margin="normal"
-      />
-      <TextField
-        label="Upper Range"
-        className={classes.textField}
-        valueUpper={props.upperMask}
-        placeholder={"10,10,10"}
-        onChange={props.onChangeUpper}
-        margin="normal"
-      />
+    <div className={classes.row}>
+      <div className={classes.column}>
+        <div className={classes.row}>
+          <TextField
+            label="HSV Lower Range 1"
+            className={classes.textField}
+            value={props.lowerMaskOne}
+            placeholder={placeholder}
+            onChange={props.onChangeLowerOne}
+            margin="normal"
+          />
+          <TextField
+            label="HSV Lower Range 2"
+            className={classes.textField}
+            value={props.lowerMaskTwo}
+            placeholder={placeholder}
+            onChange={props.onChangeLowerTwo}
+            margin="normal"
+          />
+        </div>
+        <div className={classes.row}>
+          <TextField
+            label="HSV Upper Range 1"
+            className={classes.textField}
+            value={props.upperMaskOne}
+            placeholder={placeholder}
+            onChange={props.onChangeUpperOne}
+            margin="normal"
+          />
+          <TextField
+            label="HSV Upper Range 2"
+            className={classes.textField}
+            value={props.upperMaskTwo}
+            placeholder={placeholder}
+            onChange={props.onChangeUpperTwo}
+            margin="normal"
+          />
+        </div>
+      </div>
+      <div className={classes.column}>
+        <div>Lower Mask One C</div>
+        <div>0, 100, 20</div>
+      </div>
+      <div className={classes.column}>
+        <div>Lower Mask Two C</div>
+        <div>150, 100, 20</div>
+      </div>
+      <div className={classes.column}>
+        <div>Upper Mask One C</div>
+        <div>30, 255, 177</div>
+      </div>
+      <div className={classes.column}>
+        <div>Upper Mask Two C</div>
+        <div>180, 255, 177</div>
+      </div>
     </div>
   );
 }

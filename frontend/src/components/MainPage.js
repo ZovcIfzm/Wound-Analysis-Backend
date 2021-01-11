@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import Cropper from "./ImageCropper/imageCropper";
 import Button from "@material-ui/core/Button";
 
@@ -17,8 +17,10 @@ class MainPage extends React.Component {
     imageWidth: null,
     useCrop: false,
     areas: [],
-    lowerMask: null,
-    uppperMask: null,
+    lowerMaskOne: "0, 100, 20",
+    lowerMaskTwo: "150, 100, 20",
+    upperMaskOne: "30, 255, 177",
+    upperMaskTwo: "180, 255, 17",
   };
 
   completeCrop = (image, imageFile) => {
@@ -30,7 +32,6 @@ class MainPage extends React.Component {
   };
 
   onImageChange = (event) => {
-    console.log("image changed");
     if (event.target.files && event.target.files[0]) {
       let imgFile = event.target.files[0];
       this.setState({
@@ -43,13 +44,16 @@ class MainPage extends React.Component {
   analyzeImage = async (event) => {
     event.preventDefault();
     if (this.state.currentImage && this.state.imageWidth) {
-      const url = "/analyze/";
+      const url = "/measure";
       const form = new FormData();
-      console.log("analyzeImage");
-      console.log(this.state.currentImageFile);
       form.append("file", this.state.currentImageFile);
       form.append("mode", "run");
       form.append("width", this.state.imageWidth);
+      console.log(this.state.lowerMaskOne);
+      form.append("lower_mask_one", this.state.lowerMaskOne);
+      form.append("lower_mask_two", this.state.lowerMaskTwo);
+      form.append("upper_mask_one", this.state.upperMaskOne);
+      form.append("upper_mask_two", this.state.upperMaskTwo);
 
       //Then analyze
       const analyze_options = {
@@ -62,8 +66,6 @@ class MainPage extends React.Component {
           return response.json();
         })
         .then((data) => {
-          //setAnalyzedUrl(`http://localhost:5000/uploads/${data.url}`)
-          console.log("analyzed: ", data["drawn_image"]);
           this.setState({
             analyzed: true,
             currentImage: data["drawn_image"],
@@ -92,9 +94,27 @@ class MainPage extends React.Component {
     });
   };
 
-  handleLowerMaskChange = (lowerMask) => {
+  handleLowerMaskOneChange = (event) => {
     this.setState({
-      lowerMask: lowerMask,
+      lowerMaskOne: event.target.value,
+    });
+  };
+
+  handleLowerMaskTwoChange = (event) => {
+    this.setState({
+      lowerMaskTwo: event.target.value,
+    });
+  };
+
+  handleUpperMaskOneChange = (event) => {
+    this.setState({
+      upperMaskOne: event.target.value,
+    });
+  };
+
+  handleUpperMaskTwoChange = (event) => {
+    this.setState({
+      upperMaskTwo: event.target.value,
     });
   };
 
@@ -104,8 +124,14 @@ class MainPage extends React.Component {
       <div className={classNames(classes.main, classes.mainRaised)}>
         <div className={classes.container}>
           <MaskSelector
-            valueLower={this.state.lowerMask}
-            onChangeLower={this.handleLowerMaskChange}
+            lowerMaskOne={this.state.lowerMaskOne}
+            lowerMaskTwo={this.state.lowerMaskTwo}
+            upperMaskOne={this.state.upperMaskOne}
+            upperMaskTwo={this.state.upperMaskTwo}
+            onChangeLowerOne={this.handleLowerMaskOneChange.bind(this)}
+            onChangeLowerTwo={this.handleLowerMaskTwoChange.bind(this)}
+            onChangeUpperOne={this.handleUpperMaskOneChange.bind(this)}
+            onChangeUpperTwo={this.handleUpperMaskTwoChange.bind(this)}
           />
           <div className={classes.title}>
             <h2>Automatic Wound Area Measurement</h2>
