@@ -47,13 +47,14 @@ def measurement(image, sq_ratio, lower_range, upper_range):
     
     areas = measure_area(cnts, sq_ratio)
     display_image(edged)
-
     draw_contours(overlay_img, cnts, sq_ratio)
+
     return {"drawn_image": overlay_img,
             "areas": areas,
             "lower_range": lower_range,
             "upper_range": upper_range,
             "original_image": image,
+            "edged_image": edged,
             "sq_ratio": sq_ratio,
             "error": False}
 
@@ -107,6 +108,7 @@ def custom_measure(image, real_width, mask):
         
     if data is not {}:
         return {"drawn_image": data["drawn_image"],
+                "edged_image": data["edged_image"],
                 "areas": areas,
                 "lower_range": cur_lower_range,
                 "upper_range": cur_upper_range,

@@ -13,6 +13,7 @@ class MainPage extends React.Component {
   state = {
     currentImage: null,
     currentImageFile: null,
+    edgedImage: null,
     analyzed: false,
     imageWidth: null,
     useCrop: false,
@@ -69,6 +70,7 @@ class MainPage extends React.Component {
           this.setState({
             analyzed: true,
             currentImage: data["drawn_image"],
+            edgedImage: data["edged_image"],
             areas: data.areas,
           });
         })
@@ -183,11 +185,20 @@ class MainPage extends React.Component {
                   </Button>
                 </div>
               ) : this.state.analyzed ? (
-                <img
-                  src={"data:image/png;base64," + this.state.currentImage}
-                  className={classes.images}
-                  alt=""
-                />
+                <>
+                  <h4>Image with border</h4>
+                  <img
+                    src={"data:image/png;base64," + this.state.currentImage}
+                    className={classes.images}
+                    alt=""
+                  />
+                  <h4>Border generated</h4>
+                  <img
+                    src={"data:image/png;base64," + this.state.edgedImage}
+                    className={classes.images}
+                    alt=""
+                  />
+                </>
               ) : null}
             </div>
           </div>

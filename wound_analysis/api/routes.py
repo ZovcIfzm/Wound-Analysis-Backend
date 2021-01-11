@@ -54,6 +54,12 @@ def convertStringToNumpyArray(mask_string):
     numpy = np.array(number_list)
     return numpy
 
+def convertNumpyImageToString(numpy_image):
+    _, im_arr = cv2.imencode('.jpg', numpy_image)  # im_arr: image in Numpy one-dim array format.
+    base64_bytes = base64.b64encode(im_arr)
+    jpg_as_string = base64_bytes.decode('utf-8')
+    return jpg_as_string
+
 
 @wound_analysis.app.route('/measure', methods=['POST', 'GET'])
 def measure():
@@ -78,7 +84,6 @@ def measure():
             "second": convertStringToNumpyArray(upper_mask_two)
         }
     }
-    print("mask_map: ", mask_map)
 
     # Convert image file to opencv format
     pil_image = Image.open(fileobj).convert('RGB') 
@@ -89,12 +94,10 @@ def measure():
     data = analysis.custom_measure(opencv_image, width, mask_map)
 
     # Convert drawn image to base64 string
-    _, im_arr = cv2.imencode('.jpg', data["drawn_image"])  # im_arr: image in Numpy one-dim array format.
-    base64_bytes = base64.b64encode(im_arr)
-    jpg_as_string = base64_bytes.decode('utf-8')
-    drawn_image = jpg_as_string
+    drawn_image = convertNumpyImageToString(data["drawn_image"])
+    edged_image = convertNumpyImageToString(data["edged_image"])
 
-    response = json.dumps({"drawn_image": drawn_image, "areas": data["areas"]})
+    response = json.dumps({"drawn_image": drawn_image, "edged_image": edged_image, "areas": data["areas"]})
     return response
 
 @wound_analysis.app.route('/analyze/', methods=['POST', 'GET'])
