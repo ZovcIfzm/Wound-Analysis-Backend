@@ -6,7 +6,7 @@ from imutils import perspective
 from imutils import contours
 
 # Function imports
-from wound_analysis.api.img_processing_methods import apply_mask, sharpen, blur, measure_area
+from wound_analysis.api.processing_helpers import apply_mask, sharpen, blur, measure_area
 from wound_analysis.api.helper import find_sq_ratio, display_image, draw_contours, display_overlay
 
 # Constants import

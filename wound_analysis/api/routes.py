@@ -16,9 +16,9 @@ import wound_analysis
 from PIL import Image
 import pickle
 
-import wound_analysis.api.area_optimization as analysis
+import wound_analysis.api.analysis as analysis
 
-from wound_analysis.api.area_optimization import default_measurement, optimized_masking_measurement, manual_area_adjustment
+from wound_analysis.api.analysis import default_measurement, optimized_masking_measurement, manual_area_adjustment
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
 # called `app` in `main.py`.
 
@@ -49,7 +49,6 @@ def show_time():
 
 def convertStringToNumpyArray(mask_string):
     string_list = list(mask_string.split(','))
-    print(string_list)
     number_list = [int(str) for str in string_list]
     numpy = np.array(number_list)
     return numpy
@@ -107,7 +106,6 @@ def run_recog():
     mode = flask.request.form.get("mode")
     
     fileobj = flask.request.files["file"]
-    print("fileobj: ", fileobj)
     filename = fileobj.filename
 
     pil_image = Image.open(fileobj).convert('RGB') 
