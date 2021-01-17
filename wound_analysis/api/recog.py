@@ -7,7 +7,7 @@ import cv2
 import math
 
 # Function imports
-from analysis import default_measurement, optimized_masking_measurement
+from analysis import optimized_masking_measurement
 from processing_helpers import apply_mask, sharpen, blur
 from helper import parse_arguments, display_image
 # Basic definitions

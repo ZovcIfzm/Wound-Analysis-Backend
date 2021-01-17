@@ -12,14 +12,6 @@ from wound_analysis.api.helper import find_sq_ratio, display_image, draw_contour
 # Constants import
 from wound_analysis.api.constants import DEF_LOWER_RANGE, DEF_UPPER_RANGE, AREA_UPPER_LIMIT
 
-
-def default_measurement(image, real_width):
-    sq_ratio = find_sq_ratio(image, real_width)
-    data = measurement(image, sq_ratio, DEF_LOWER_RANGE, DEF_UPPER_RANGE)
-    if not data["error"]:
-        display_image(data["drawn_image"])
-
-
 def measurement(image, sq_ratio, lower_range, upper_range):
     overlay_img = image.copy()
     _image = image.copy()

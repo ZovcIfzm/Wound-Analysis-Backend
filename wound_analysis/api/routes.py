@@ -18,7 +18,7 @@ import pickle
 
 import wound_analysis.api.analysis as analysis
 
-from wound_analysis.api.analysis import default_measurement, optimized_masking_measurement, manual_area_adjustment
+from wound_analysis.api.analysis import optimized_masking_measurement, manual_area_adjustment
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
 # called `app` in `main.py`.
 
