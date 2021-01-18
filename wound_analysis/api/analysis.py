@@ -6,8 +6,8 @@ from imutils import perspective
 from imutils import contours
 
 # Function imports
-from wound_analysis.api.processing_helpers import apply_mask, sharpen, blur, measure_area
-from wound_analysis.api.helper import find_sq_ratio, display_image, draw_contours, display_overlay
+import wound_analysis.api.processing_helpers as processing_helpers
+import wound_analysis.api.helpers as helpers
 
 # Constants import
 from wound_analysis.api.constants import DEF_LOWER_RANGE, DEF_UPPER_RANGE, AREA_UPPER_LIMIT
@@ -15,7 +15,7 @@ from wound_analysis.api.constants import DEF_LOWER_RANGE, DEF_UPPER_RANGE, AREA_
 def measurement(image, sq_ratio, lower_range, upper_range):
     overlay_img = image.copy()
     _image = image.copy()
-    _image = apply_mask(lower_range, upper_range, _image)
+    _image = processing_helpers.apply_mask(lower_range, upper_range, _image)
     gray = cv2.cvtColor(_image, cv2.COLOR_BGR2GRAY)
     edged = cv2.Canny(gray, 50, 100)
     edged = cv2.dilate(edged, None, iterations=9)
@@ -37,9 +37,9 @@ def measurement(image, sq_ratio, lower_range, upper_range):
             "error": False}
         
     
-    areas = measure_area(cnts, sq_ratio)
-    display_image(edged)
-    draw_contours(overlay_img, cnts, sq_ratio)
+    areas = processing_helpers.measure_area(cnts, sq_ratio)
+    #helpers.display_image(edged)
+    helpers.draw_contours(overlay_img, cnts, sq_ratio)
 
     return {"drawn_image": overlay_img,
             "areas": areas,
@@ -54,7 +54,7 @@ def measurement(image, sq_ratio, lower_range, upper_range):
 def optimized_masking_measurement(image, real_width):
     cur_lower_range = DEF_LOWER_RANGE
     cur_upper_range = DEF_UPPER_RANGE
-    sq_ratio = find_sq_ratio(image, real_width)
+    sq_ratio = helpers.find_sq_ratio(image, real_width)
     for i in range(10):
         data = measurement(image, sq_ratio, cur_lower_range, cur_upper_range)
         areas = data["areas"]
@@ -81,9 +81,9 @@ def optimized_masking_measurement(image, real_width):
         return {"error": True}
 
 def custom_measure(image, real_width, mask):
-    cur_lower_range = [np.array(mask["lower_range"]["first"]), np.array(mask["lower_range"]["second"])]
-    cur_upper_range = [np.array(mask["upper_range"]["first"]), np.array(mask["upper_range"]["second"])]
-    sq_ratio = find_sq_ratio(image, real_width)
+    cur_lower_range = np.array([np.array(mask["lower_range"]["first"]), np.array(mask["lower_range"]["second"])])
+    cur_upper_range = np.array([np.array(mask["upper_range"]["first"]), np.array(mask["upper_range"]["second"])])
+    sq_ratio = helpers.find_sq_ratio(image, real_width)
     for i in range(10):
         data = measurement(image, sq_ratio, cur_lower_range, cur_upper_range)
         areas = data["areas"]
@@ -99,16 +99,26 @@ def custom_measure(image, real_width, mask):
             break
         
     if data is not {}:
-        return {"drawn_image": data["drawn_image"],
-                "edged_image": data["edged_image"],
+        return {"drawn_image": helpers.convertNumpyImageToString(data["drawn_image"]),
+                "edged_image": helpers.convertNumpyImageToString(data["edged_image"]),
                 "areas": areas,
-                "lower_range": cur_lower_range,
-                "upper_range": cur_upper_range,
-                "original_image": image,
+                "lower_range": cur_lower_range.tolist(),
+                "upper_range": cur_upper_range.tolist(),
                 "sq_ratio": sq_ratio,
                 "error": False}
     else:
         return {"error": True}
+
+def grid_measurement(image, real_width, mask):
+    masks = processing_helpers.extend_mask_search(mask)
+    matrix = []
+    for i in range(7):
+        row = []
+        for j in range(7):
+            row.append(custom_measure(image, real_width, masks[i][j]))
+        matrix.append(row)
+
+    return matrix
 
 def manual_area_adjustment(prev_data, increase_sat):
 
@@ -122,5 +132,5 @@ def manual_area_adjustment(prev_data, increase_sat):
     data = measurement(
         prev_data["original_image"], prev_data["sq_ratio"], prev_data["lower_range"], prev_data["upper_range"])
     # if not data["error"]:
-    #    display_image(data["drawn_image"])
+    #    helpers.display_image(data["drawn_image"])
     return data

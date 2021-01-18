@@ -1,6 +1,7 @@
 import argparse
 import numpy as np
 import cv2
+import base64
 
 from wound_analysis.api.constants import AREA_LOWER_LIMIT
 
@@ -48,3 +49,16 @@ def draw_contours(image_background, contours, sq_ratio):
             continue
 
         cv2.drawContours(image_background, cont, -1, (0, 255, 0), 2)
+
+
+def convertStringToNumpyArray(mask_string):
+    string_list = list(mask_string.split(','))
+    number_list = [int(str) for str in string_list]
+    numpy = np.array(number_list)
+    return numpy
+
+def convertNumpyImageToString(numpy_image):
+    _, im_arr = cv2.imencode('.jpg', numpy_image)  # im_arr: image in Numpy one-dim array format.
+    base64_bytes = base64.b64encode(im_arr)
+    jpg_as_string = base64_bytes.decode('utf-8')
+    return jpg_as_string

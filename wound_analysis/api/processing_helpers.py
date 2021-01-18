@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from scipy.spatial import distance as dist
 
-import constants as k
+import wound_analysis.api.constants as k
 import copy
 
 def midpoint(ptA, ptB):
@@ -65,28 +65,40 @@ def extend_mask_search(mask):
         "Val_6": k.VAL_STEP_3
     }
 
-    #masks = np.zeros(shape=(2,2))
-    masks = [[[] for i in range(2)] for j in range(2)]
-    masks[0][0] = lower_mask_one
-    masks[0][1] = lower_mask_two
-    masks[1][0] = upper_mask_one
-    masks[1][1] = upper_mask_two
+    masks = {
+        "lower_range": {
+            "first": None,
+            "second": None
+        },
+        "upper_range": {
+            "first": None,
+            "second": None,
+        }
+        
+    }
+    masks["lower_range"]["first"] = lower_mask_one
+    masks["lower_range"]["second"] = lower_mask_two
+    masks["upper_range"]["first"] = upper_mask_one
+    masks["upper_range"]["second"] = upper_mask_two
     
     matrix = []
     for i in range(7):
         row = []
         for j in range(7):
             new_mask = copy.deepcopy(masks)
-            new_mask[1][0][1] += step_dictionary["Sat_" + str(i)]
-            new_mask[1][0][2] += step_dictionary["Val_" + str(j)]
-            new_mask[1][1][1] += step_dictionary["Sat_" + str(i)]
-            new_mask[1][1][2] += step_dictionary["Val_" + str(j)]
+            new_mask["upper_range"]["first"][1] += step_dictionary["Sat_" + str(i)]
+            new_mask["upper_range"]["first"][2] += step_dictionary["Val_" + str(j)]
+            new_mask["upper_range"]["second"][1] += step_dictionary["Sat_" + str(i)]
+            new_mask["upper_range"]["second"][2] += step_dictionary["Val_" + str(j)]
             row.append(copy.deepcopy(new_mask))
         matrix.append(copy.deepcopy(row))
 
+    return matrix
+    '''
     for i, row in enumerate(matrix):
         for j, col in enumerate(row):
             print(matrix[i][j])
+    '''
 
 if __name__ == "__main__":
     mask = {

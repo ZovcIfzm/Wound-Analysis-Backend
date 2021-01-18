@@ -5,7 +5,6 @@ import os
 from werkzeug.utils import secure_filename
 import cv2
 import time
-import base64
 
 import pathlib
 import uuid
@@ -17,8 +16,7 @@ from PIL import Image
 import pickle
 
 import wound_analysis.api.analysis as analysis
-
-from wound_analysis.api.analysis import optimized_masking_measurement, manual_area_adjustment
+import wound_analysis.api.helpers as helpers
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
 # called `app` in `main.py`.
 
@@ -47,19 +45,6 @@ def show_time():
     print("tested")
     return {"test": "testedInFlask"}
 
-def convertStringToNumpyArray(mask_string):
-    string_list = list(mask_string.split(','))
-    number_list = [int(str) for str in string_list]
-    numpy = np.array(number_list)
-    return numpy
-
-def convertNumpyImageToString(numpy_image):
-    _, im_arr = cv2.imencode('.jpg', numpy_image)  # im_arr: image in Numpy one-dim array format.
-    base64_bytes = base64.b64encode(im_arr)
-    jpg_as_string = base64_bytes.decode('utf-8')
-    return jpg_as_string
-
-
 @wound_analysis.app.route('/measure', methods=['POST', 'GET'])
 def measure():
     global data
@@ -75,12 +60,12 @@ def measure():
     upper_mask_two = str(flask.request.form.get("upper_mask_two"))
     mask_map = {
         "lower_range": {
-            "first": convertStringToNumpyArray(lower_mask_one),
-            "second": convertStringToNumpyArray(lower_mask_two)
+            "first": helpers.convertStringToNumpyArray(lower_mask_one),
+            "second": helpers.convertStringToNumpyArray(lower_mask_two)
         },
         "upper_range": {
-            "first": convertStringToNumpyArray(upper_mask_one),
-            "second": convertStringToNumpyArray(upper_mask_two)
+            "first": helpers.convertStringToNumpyArray(upper_mask_one),
+            "second": helpers.convertStringToNumpyArray(upper_mask_two)
         }
     }
 
@@ -90,14 +75,11 @@ def measure():
 
     # Convert RGB to BGR 
     opencv_image = opencv_image[:, :, ::-1].copy() 
-    data = analysis.custom_measure(opencv_image, width, mask_map)
+    data_matrix = analysis.grid_measurement(opencv_image, width, mask_map)
 
-    # Convert drawn image to base64 string
-    drawn_image = convertNumpyImageToString(data["drawn_image"])
-    edged_image = convertNumpyImageToString(data["edged_image"])
-
-    response = json.dumps({"drawn_image": drawn_image, "edged_image": edged_image, "areas": data["areas"]})
+    response = json.dumps(data_matrix)
     return response
+
 
 @wound_analysis.app.route('/analyze/', methods=['POST', 'GET'])
 def run_recog():
@@ -116,7 +98,7 @@ def run_recog():
     if mode == "run":
         width = float(flask.request.form.get("width"))
         image = opencv_image
-        data = optimized_masking_measurement(image, width)
+        data = analysis.optimized_masking_measurement(image, width)
         _, im_arr = cv2.imencode('.jpg', data["drawn_image"])  # im_arr: image in Numpy one-dim array format.
         base64_bytes = base64.b64encode(im_arr)
         jpg_as_string = base64_bytes.decode('utf-8')
@@ -127,14 +109,14 @@ def run_recog():
 
     elif mode == "increase sat":
         width = float(flask.request.form.get("width"))
-        data = manual_area_adjustment(data, True)
+        data = analysis.manual_area_adjustment(data, True)
         print("printing data")
         # print(data)
 
         cv2.imwrite('cur_image.jpg', data["drawn_image"])
     elif mode == "decrease sat":
         width = float(flask.request.form.get("width"))
-        data = manual_area_adjustment(data, False)
+        data = analysis.manual_area_adjustment(data, False)
         print("printing data")
         # print(data)
         cv2.imwrite('cur_image.jpg', data["drawn_image"])
