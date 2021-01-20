@@ -15,8 +15,12 @@ The api will be running on localhost:5000
 <img src="https://github.com/ZovcIfzm/Wound-Analysis-Backend/blob/master/readme-imgs/readme2.png" width="720">  
 <img src="https://github.com/ZovcIfzm/Wound-Analysis-Backend/blob/master/readme-imgs/readme3.png" width="720">
 
-# Special implementation steps
+### Special implementation steps
 
 Due to bugs with libgl1, an Aptfile needs to be added.
 To add it, run
 heroku buildpacks:add --index 1 https://github.com/heroku/heroku-buildpack-apt
+
+### To set up venv FLASK_APP:
+
+This commmand, $env:FLASK_APP = "**init**.py", is needed in order for the api to be run.
