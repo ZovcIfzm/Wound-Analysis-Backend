@@ -79,7 +79,6 @@ def measure():
 
     response = json.dumps(data_matrix)
     print(response)
-    sys.stdout.flush()
     return response
 
 
