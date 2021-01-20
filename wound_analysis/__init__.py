@@ -3,20 +3,16 @@
 
 # This commmand, $env:FLASK_APP = "__init__.py", is needed in order for the api to be run.
 
-import flask
+from flask import Flask
 
-app = flask.Flask(__name__, static_folder='../frontend/build',
-                    static_url_path='/')
+app = Flask(__name__)
 
-app.config.from_object('wound_analysis.config')
-app.config.from_envvar('PROJ_SETTINGS', silent=True)
+#app.config.from_object('wound_analysis.config')
+#app.config.from_envvar('PROJ_SETTINGS', silent=True)
 
 import wound_analysis.api
 
 print('__init__.py ran manually')
-# [END gae_python38_app]
-
-
 
 @wound_analysis.app.route('/testMain2/', methods=['POST', 'GET'])
 def testMain2():
