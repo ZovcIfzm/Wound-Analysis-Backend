@@ -110,6 +110,7 @@ def custom_measure(image, real_width, mask):
         return {"error": True}
 
 def grid_measurement(image, real_width, mask):
+    '''
     masks = processing_helpers.extend_mask_search(mask)
     matrix = []
     for i in range(7):
@@ -119,6 +120,8 @@ def grid_measurement(image, real_width, mask):
         matrix.append(row)
 
     return matrix
+    '''
+    return custom_measure(image, real_width, mask)
 
 def manual_area_adjustment(prev_data, increase_sat):
 
