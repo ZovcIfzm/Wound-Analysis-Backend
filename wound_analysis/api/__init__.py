@@ -1,1 +1,1 @@
-from wound_analysis.api.routes import *
+import wound_analysis.api.routes

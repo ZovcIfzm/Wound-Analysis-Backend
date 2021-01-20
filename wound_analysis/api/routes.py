@@ -130,7 +130,7 @@ def run_recog():
 @wound_analysis.app.route('/')
 def hello():
     """Return a friendly HTTP greeting."""
-    return wound_analysis.app.send_static_file("index.html")
+    return "This is the wound analysis api"
 
 @wound_analysis.app.route('/upload/',  methods=['POST', 'GET'])
 def upload():

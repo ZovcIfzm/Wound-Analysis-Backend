@@ -12,7 +12,6 @@ app.config.from_object('wound_analysis.config')
 app.config.from_envvar('PROJ_SETTINGS', silent=True)
 
 import wound_analysis.api
-import wound_analysis.model
 
 print('__init__.py ran manually')
 # [END gae_python38_app]
