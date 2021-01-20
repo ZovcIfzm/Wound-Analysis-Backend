@@ -3,7 +3,7 @@ import numpy as np
 import cv2
 import base64
 
-from wound_analysis.api.constants import AREA_LOWER_LIMIT
+import wound_analysis.api.constants as k
 
 
 def parse_arguments():
@@ -45,7 +45,7 @@ def draw_contours(image_background, contours, sq_ratio):
         cont_area = cv2.contourArea(cont)/sq_ratio
 
         # if the contour is not sufficiently large, ignore it
-        if cont_area < AREA_LOWER_LIMIT:
+        if cont_area < k.AREA_LOWER_LIMIT:
             continue
 
         cv2.drawContours(image_background, cont, -1, (0, 255, 0), 2)
