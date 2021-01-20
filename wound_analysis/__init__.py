@@ -13,4 +13,4 @@ def testMain2():
     print('__init__.py ran')
     return "__init__.py ran in api"
 '''
-#import wound_analysis.api
+import wound_analysis.api
