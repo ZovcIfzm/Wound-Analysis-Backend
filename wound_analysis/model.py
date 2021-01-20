@@ -1,3 +1,4 @@
+'''
 """Insta485 model (database) API."""
 import sqlite3
 import flask
@@ -44,3 +45,4 @@ def close_db(error):
     if sqlite_db is not None:
         sqlite_db.commit()
         sqlite_db.close()
+'''
