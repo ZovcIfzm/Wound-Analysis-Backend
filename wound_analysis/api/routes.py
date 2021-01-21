@@ -78,7 +78,7 @@ def measure():
     data_matrix = analysis.grid_measurement(opencv_image, width, mask_map)
 
     response = json.dumps(data_matrix)
-    print(response)
+    #print(response)
     return response
 
 

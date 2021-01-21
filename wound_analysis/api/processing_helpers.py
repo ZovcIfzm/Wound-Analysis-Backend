@@ -47,7 +47,7 @@ def extend_mask_search(mask):
     lower_mask_two = np.array(mask["lower_range"]["second"])
     upper_mask_one = np.array(mask["upper_range"]["first"])
     upper_mask_two = np.array(mask["upper_range"]["second"])
-
+    '''
     step_dictionary = {
         "Sat_0": -k.SAT_STEP_3,
         "Sat_1": -k.SAT_STEP_2,
@@ -64,7 +64,28 @@ def extend_mask_search(mask):
         "Val_5": k.VAL_STEP_2,
         "Val_6": k.VAL_STEP_3
     }
-
+    
+    step_dictionary = {
+        "Sat_0": -k.SAT_STEP_2,
+        "Sat_1": -k.SAT_STEP_1,
+        "Sat_2": 0,
+        "Sat_3": k.SAT_STEP_1,
+        "Sat_4": k.SAT_STEP_2,
+        "Val_0": -k.VAL_STEP_2,
+        "Val_1": -k.VAL_STEP_1,
+        "Val_2": 0,
+        "Val_3": k.VAL_STEP_1,
+        "Val_4": k.VAL_STEP_2,
+    }
+    '''
+    step_dictionary = {
+        "Sat_0": -k.SAT_STEP_3,
+        "Sat_1": 0,
+        "Sat_2": k.SAT_STEP_3,
+        "Val_0": -k.VAL_STEP_3,
+        "Val_1": 0,
+        "Val_2": k.VAL_STEP_3
+    }
     masks = {
         "lower_range": {
             "first": None,
@@ -82,9 +103,9 @@ def extend_mask_search(mask):
     masks["upper_range"]["second"] = upper_mask_two
     
     matrix = []
-    for i in range(7):
+    for i in range(3):
         row = []
-        for j in range(7):
+        for j in range(3):
             new_mask = copy.deepcopy(masks)
             new_mask["upper_range"]["first"][1] += step_dictionary["Sat_" + str(i)]
             new_mask["upper_range"]["first"][2] += step_dictionary["Val_" + str(j)]
