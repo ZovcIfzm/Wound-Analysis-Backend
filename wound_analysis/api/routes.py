@@ -82,50 +82,23 @@ def measure():
     return response
 
 
-@wound_analysis.app.route('/analyze/', methods=['POST', 'GET'])
-def run_recog():
-    global data
-    global test_val
-    mode = flask.request.form.get("mode")
-    
+@wound_analysis.app.route('/testImage', methods=['POST', 'GET'])
+def testImage():
+
+    # Retrieve fields
     fileobj = flask.request.files["file"]
     filename = fileobj.filename
 
+    # Convert image file to opencv format
     pil_image = Image.open(fileobj).convert('RGB') 
     opencv_image = np.array(pil_image) 
+
     # Convert RGB to BGR 
     opencv_image = opencv_image[:, :, ::-1].copy() 
 
-    if mode == "run":
-        width = float(flask.request.form.get("width"))
-        image = opencv_image
-        data = analysis.optimized_masking_measurement(image, width)
-        _, im_arr = cv2.imencode('.jpg', data["drawn_image"])  # im_arr: image in Numpy one-dim array format.
-        base64_bytes = base64.b64encode(im_arr)
-        jpg_as_string = base64_bytes.decode('utf-8')
-        drawn_image = jpg_as_string
-
-        response = json.dumps({"drawn_image": drawn_image, "areas": data["areas"]})
-        return response
-
-    elif mode == "increase sat":
-        width = float(flask.request.form.get("width"))
-        data = analysis.manual_area_adjustment(data, True)
-        print("printing data")
-        # print(data)
-
-        cv2.imwrite('cur_image.jpg', data["drawn_image"])
-    elif mode == "decrease sat":
-        width = float(flask.request.form.get("width"))
-        data = analysis.manual_area_adjustment(data, False)
-        print("printing data")
-        # print(data)
-        cv2.imwrite('cur_image.jpg', data["drawn_image"])
-    elif mode == "test":
-        test_val += 2
-        print(test_val)
-
-    return flask.redirect("/")
+    response = json.dumps(helpers.convertNumpyImageToString(opencv_image))
+    #print(response)
+    return response
 
 
 @wound_analysis.app.route('/')
