@@ -3,11 +3,11 @@ import numpy as np
 AREA_UPPER_LIMIT = 0.675
 AREA_LOWER_LIMIT = 0.005
 
-A_LR = [np.array([0, 75, 70]), np.array([160, 75, 70])]
-A_UR = [np.array([20, 255, 200]), np.array([180, 255, 200])]
+A_LR = [np.array([0, 75, 180]), np.array([165, 75, 180])]
+A_UR = [np.array([15, 255, 200]), np.array([180, 255, 200])]
 
-B_LR = [np.array([0, 95, 30]), np.array([150, 95, 30])]
-B_UR = [np.array([30, 255, 197]), np.array([180, 255, 197])]
+B_LR = [np.array([0, 95, 140]), np.array([165, 95, 140])]
+B_UR = [np.array([15, 255, 197]), np.array([180, 255, 197])]
 
 C_LR = [np.array([0, 100, 20]), np.array([150, 100, 20])]
 C_UR = [np.array([30, 255, 177]), np.array([180, 255, 177])]

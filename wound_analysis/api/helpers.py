@@ -60,5 +60,5 @@ def convertStringToNumpyArray(mask_string):
 def convertNumpyImageToString(numpy_image):
     _, im_arr = cv2.imencode('.jpg', numpy_image)  # im_arr: image in Numpy one-dim array format.
     base64_bytes = base64.b64encode(im_arr)
-    jpg_as_string = base64_bytes.decode('utf-8')
+    jpg_as_string = "data:image/jpg;base64," + base64_bytes.decode('utf-8')
     return jpg_as_string

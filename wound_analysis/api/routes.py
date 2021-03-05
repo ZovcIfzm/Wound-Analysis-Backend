@@ -51,7 +51,8 @@ def measure():
     global test_val
 
     # Retrieve fields
-    width = float(flask.request.form.get("width"))
+    # width = float(flask.request.form.get("width"))
+    
     fileobj = flask.request.files["file"]
     filename = fileobj.filename
     lower_mask_one = str(flask.request.form.get("lower_mask_one"))
@@ -75,7 +76,7 @@ def measure():
 
     # Convert RGB to BGR 
     opencv_image = opencv_image[:, :, ::-1].copy() 
-    data_matrix = analysis.grid_measurement(opencv_image, width, mask_map)
+    data_matrix = analysis.grid_measurement(opencv_image, mask_map)
 
     response = json.dumps(data_matrix)
     #print(response)

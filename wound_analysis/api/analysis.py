@@ -80,10 +80,12 @@ def optimized_masking_measurement(image, real_width):
     else:
         return {"error": True}
 
-def custom_measure(image, real_width, mask):
+def custom_measure(image, sq_ratio, mask):
     cur_lower_range = np.array([np.array(mask["lower_range"]["first"]), np.array(mask["lower_range"]["second"])])
     cur_upper_range = np.array([np.array(mask["upper_range"]["first"]), np.array(mask["upper_range"]["second"])])
-    sq_ratio = helpers.find_sq_ratio(image, real_width)
+    
+    #sq_ratio = helpers.find_sq_ratio(image, real_width)
+    '''
     for i in range(10):
         data = measurement(image, sq_ratio, cur_lower_range, cur_upper_range)
         areas = data["areas"]
@@ -97,7 +99,10 @@ def custom_measure(image, real_width, mask):
             print("decreasing num")
         else:
             break
-        
+    '''
+    
+    data = measurement(image, sq_ratio, cur_lower_range, cur_upper_range) 
+    areas = data["areas"]
     if data is not {}:
         return {"drawn_image": helpers.convertNumpyImageToString(data["drawn_image"]),
                 "edged_image": helpers.convertNumpyImageToString(data["edged_image"]),
@@ -109,14 +114,17 @@ def custom_measure(image, real_width, mask):
     else:
         return {"error": True}
 
-def grid_measurement(image, real_width, mask):
+def grid_measurement(image, mask):
     
+    processing_helpers.find_real_size(image, 1)
     masks = processing_helpers.extend_mask_search(mask)
+    ratio, image = processing_helpers.find_real_size(image, 2.54)
+    sq_ratio = ratio*ratio
     matrix = []
     for i in range(3):
         row = []
         for j in range(3):
-            row.append(custom_measure(image, real_width, masks[i][j]))
+            row.append(custom_measure(image, sq_ratio, masks[i][j]))
         matrix.append(row)
 
     return matrix
