@@ -97,7 +97,7 @@ def custom_measure(image, rec_image, sq_ratio, mask):
     else:
         return {"error": True}
 
-def grid_measurement(image, mask):
+def grid_measurement(image, orig, mask):
     masks = processing_helpers.extend_mask_search(mask)
     ratio, rec_image = processing_helpers.find_real_size(image, 2.54)
     sq_ratio = ratio*ratio
@@ -106,19 +106,18 @@ def grid_measurement(image, mask):
         row = []
         for j in range(3):
             obj = custom_measure(image, rec_image, sq_ratio, masks[i][j])
+            obj["orig"] = orig
             row.append(obj)
         matrix.append(row)
 
     return matrix
-    '''
-    return custom_measure(image, real_width, mask)
-    '''
 
-def zip_measurement(image, mask):
+def zip_measurement(image, orig, mask):
     try:
         ratio, rec_image = processing_helpers.find_real_size(image, 2.54)
         sq_ratio = ratio*ratio    
         return_object = custom_measure(image, rec_image, sq_ratio, mask)
+        return_object["orig"] = orig
         return return_object
     except:
         return "Error in image measurement"

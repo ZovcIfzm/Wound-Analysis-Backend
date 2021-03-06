@@ -15,6 +15,10 @@ import wound_analysis
 from PIL import Image
 import pickle
 
+from imageio import imread
+import io
+import base64
+
 import zipfile
 
 import wound_analysis.api.analysis as analysis
@@ -73,12 +77,22 @@ def zipMeasure():
         imgfile = archive.open(img_name)
 
         # Convert image file to opencv format
-        pil_image = Image.open(imgfile).convert('RGB') 
+        image = Image.open(imgfile)
+        buf = io.BytesIO()
+        image.save(buf, 'jpeg')
+        buf.seek(0)
+        image_bytes = buf.read()
+        buf.close()
+
+        base64_bytes = base64.b64encode(image_bytes)
+        input_base64_image = "data:image/jpeg;base64," + base64_bytes.decode()
+        
+        pil_image = image.convert('RGB') 
         opencv_image = np.array(pil_image) 
 
         # Convert RGB to BGR 
         opencv_image = opencv_image[:, :, ::-1].copy() 
-        image_list.append(analysis.zip_measurement(opencv_image, mask_map))
+        image_list.append(analysis.zip_measurement(opencv_image, input_base64_image, mask_map))
 
     response = json.dumps(image_list)
     return response
@@ -90,6 +104,9 @@ def measure():
     
     fileobj = flask.request.files["file"]
     filename = fileobj.filename
+    input_base64_image = flask.request.form.get("base64")
+    b64_string = input_base64_image.split("data:image/jpeg;base64")[1]
+    
     lower_mask_one = str(flask.request.form.get("lower_mask_one"))
     lower_mask_two = str(flask.request.form.get("lower_mask_two"))
     upper_mask_one = str(flask.request.form.get("upper_mask_one"))
@@ -106,12 +123,17 @@ def measure():
     }
 
     # Convert image file to opencv format
-    pil_image = Image.open(fileobj).convert('RGB') 
+    decoded = base64.b64decode(b64_string)
+    ioed = io.BytesIO(decoded)
+    #img = imread(ioed)
+    #opencv_image = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    image = Image.open(ioed)
+    pil_image = image.convert('RGB') 
     opencv_image = np.array(pil_image) 
 
     # Convert RGB to BGR 
     opencv_image = opencv_image[:, :, ::-1].copy() 
-    data_matrix = analysis.grid_measurement(opencv_image, mask_map)
+    data_matrix = analysis.grid_measurement(opencv_image, input_base64_image, mask_map)
 
     response = json.dumps(data_matrix)
     #print(response)
@@ -136,6 +158,13 @@ def testImage():
     #print(response)
     return response
 
+
+@wound_analysis.app.route('/testBase64', methods=['POST', 'GET'])
+def testBase64():
+    
+    lower_mask_one = str(flask.request.form.get("base64"))
+    #print(response)
+    return "tested"
 
 @wound_analysis.app.route('/')
 def hello():
