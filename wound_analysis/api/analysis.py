@@ -14,8 +14,8 @@ import wound_analysis.api.helpers as helpers
 # Constants import
 from wound_analysis.api.constants import DEF_LOWER_RANGE, DEF_UPPER_RANGE, AREA_UPPER_LIMIT
 
-def measurement(image, sq_ratio, lower_range, upper_range):
-    overlay_img = image.copy()
+def measurement(image, rec_image, sq_ratio, lower_range, upper_range):
+    overlay_img = rec_image.copy()
     _image = image.copy()
     _image = processing_helpers.apply_mask(lower_range, upper_range, _image)
     gray = cv2.cvtColor(_image, cv2.COLOR_BGR2GRAY)
@@ -47,7 +47,6 @@ def measurement(image, sq_ratio, lower_range, upper_range):
             "areas": areas,
             "lower_range": lower_range,
             "upper_range": upper_range,
-            "original_image": image,
             "edged_image": edged,
             "sq_ratio": sq_ratio,
             "error": False}
@@ -76,34 +75,16 @@ def optimized_masking_measurement(image, real_width):
                 "areas": areas,
                 "lower_range": cur_lower_range,
                 "upper_range": cur_upper_range,
-                "original_image": image,
                 "sq_ratio": sq_ratio,
                 "error": False}
     else:
         return {"error": True}
 
-def custom_measure(image, sq_ratio, mask):
+def custom_measure(image, rec_image, sq_ratio, mask):
     cur_lower_range = np.array([np.array(mask["lower_range"]["first"]), np.array(mask["lower_range"]["second"])])
     cur_upper_range = np.array([np.array(mask["upper_range"]["first"]), np.array(mask["upper_range"]["second"])])
     
-    #sq_ratio = helpers.find_sq_ratio(image, real_width)
-    '''
-    for i in range(10):
-        data = measurement(image, sq_ratio, cur_lower_range, cur_upper_range)
-        areas = data["areas"]
-        if areas == []:
-            cur_lower_range[0][1] *= 0.9
-            cur_lower_range[1][1] *= 0.9
-            print("increasing num")
-        elif areas[len(areas)-1] > AREA_UPPER_LIMIT:
-            cur_lower_range[0][1] *= 1.1
-            cur_lower_range[1][1] *= 1.1
-            print("decreasing num")
-        else:
-            break
-    '''
-    
-    data = measurement(image, sq_ratio, cur_lower_range, cur_upper_range) 
+    data = measurement(image, rec_image, sq_ratio, cur_lower_range, cur_upper_range) 
     areas = data["areas"]
     if data is not {}:
         return {"drawn_image": helpers.convertNumpyImageToString(data["drawn_image"]),
@@ -118,13 +99,14 @@ def custom_measure(image, sq_ratio, mask):
 
 def grid_measurement(image, mask):
     masks = processing_helpers.extend_mask_search(mask)
-    ratio, image = processing_helpers.find_real_size(image, 2.54)
+    ratio, rec_image = processing_helpers.find_real_size(image, 2.54)
     sq_ratio = ratio*ratio
     matrix = []
     for i in range(3):
         row = []
         for j in range(3):
-            row.append(custom_measure(image, sq_ratio, masks[i][j]))
+            obj = custom_measure(image, rec_image, sq_ratio, masks[i][j])
+            row.append(obj)
         matrix.append(row)
 
     return matrix
@@ -134,9 +116,9 @@ def grid_measurement(image, mask):
 
 def zip_measurement(image, mask):
     try:
-        ratio, image = processing_helpers.find_real_size(image, 2.54)
+        ratio, rec_image = processing_helpers.find_real_size(image, 2.54)
         sq_ratio = ratio*ratio    
-        return_object = custom_measure(image, sq_ratio, mask)
+        return_object = custom_measure(image, rec_image, sq_ratio, mask)
         return return_object
     except:
         return "Error in image measurement"

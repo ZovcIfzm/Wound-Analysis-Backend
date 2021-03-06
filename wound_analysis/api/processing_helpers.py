@@ -127,7 +127,8 @@ def extend_mask_search(mask):
 
 def find_real_size(img, width):
     # load the image, convert it to grayscale, and blur it slightly
-    image = img
+    image = img.copy()
+    overlay_img = img.copy()
 
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv, (20,60,60), (50,140,170))
@@ -150,12 +151,13 @@ def find_real_size(img, width):
     (cnts, _) = contours.sort_contours(cnts)
     pixelsPerMetric = None
     # loop over the contours individually
+    orig = overlay_img.copy()
     for c in cnts:
         # if the contour is not sufficiently large, ignore it
-        if cv2.contourArea(c) < 1000:
+        if cv2.contourArea(c) < 10000:
             continue
+        print("a countour")
         # compute the rotated bounding box of the contour
-        orig = image.copy()
         box = cv2.minAreaRect(c)
         box = cv2.cv.BoxPoints(box) if imutils.is_cv2() else cv2.boxPoints(box)
         box = np.array(box, dtype="int")
@@ -168,7 +170,7 @@ def find_real_size(img, width):
         
         cv2.drawContours(orig, [box.astype("int")], -1, (255, 0, 0), 2)
         # Also draw for returned image (normal image + lines)
-        cv2.drawContours(img, [box.astype("int")], -1, (255, 0, 0), 2)
+        cv2.drawContours(overlay_img, [box.astype("int")], -1, (255, 0, 0), 2)
 
         # loop over the original points and draw them
         for (x, y) in box:
@@ -203,11 +205,12 @@ def find_real_size(img, width):
         # if the pixels per metric has not been initialized, then
         # compute it as the ratio of pixels to supplied metric
         # (in this case, inches)
-        if pixelsPerMetric is None:
-            if dA > dB:
-                pixelsPerMetric = dA / width
-            else:
-                pixelsPerMetric = dB / width
+        print("dA:", dA)
+        print("dB:", dB)
+        if dA > dB:
+            pixelsPerMetric = dA / width
+        else:
+            pixelsPerMetric = dB / width
 
         # compute the size of the object
         dimA = dA / pixelsPerMetric
@@ -227,7 +230,7 @@ def find_real_size(img, width):
         #cv2.imshow("Image", _orig) 
         #cv2.waitKey(0)
 
-    return pixelsPerMetric, img
+    return pixelsPerMetric, orig
 
 
 if __name__ == "__main__":
