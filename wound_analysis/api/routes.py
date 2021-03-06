@@ -15,6 +15,8 @@ import wound_analysis
 from PIL import Image
 import pickle
 
+import zipfile
+
 import wound_analysis.api.analysis as analysis
 import wound_analysis.api.helpers as helpers
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
@@ -45,11 +47,43 @@ def show_time():
     print("tested")
     return {"test": "testedInFlask"}
 
+@wound_analysis.app.route('/zipMeasure', methods=['POST', 'GET'])
+def zipMeasure():
+    
+    fileobj = flask.request.files["file"]
+    filename = fileobj.filename
+    day = filename.split(".zip")[0]
+
+    archive = zipfile.ZipFile(fileobj, 'r')
+    namelist = archive.namelist()
+
+    imgfile = archive.open(namelist[0])
+
+    ranges = helpers.dayMaskMapper(int(day))
+    mask_map = {
+        "lower_range": {
+            "first": ranges[0][0],
+            "second": ranges[0][1]
+        },
+        "upper_range": {
+            "first": ranges[1][0],
+            "second": ranges[1][1]
+        }
+    }
+    
+    # Convert image file to opencv format
+    pil_image = Image.open(imgfile).convert('RGB') 
+    opencv_image = np.array(pil_image) 
+
+    # Convert RGB to BGR 
+    opencv_image = opencv_image[:, :, ::-1].copy() 
+    data_matrix = analysis.grid_measurement(opencv_image, mask_map)
+
+    response = json.dumps(data_matrix)
+    return response
+
 @wound_analysis.app.route('/measure', methods=['POST', 'GET'])
 def measure():
-    global data
-    global test_val
-
     # Retrieve fields
     # width = float(flask.request.form.get("width"))
     

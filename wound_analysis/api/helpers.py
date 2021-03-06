@@ -62,3 +62,11 @@ def convertNumpyImageToString(numpy_image):
     base64_bytes = base64.b64encode(im_arr)
     jpg_as_string = "data:image/jpg;base64," + base64_bytes.decode('utf-8')
     return jpg_as_string
+
+def dayMaskMapper(day):
+    if day == 0:
+        return k.A_LR, k.A_UR
+    elif day == 1:
+        return k.B_LR, k.B_UR
+    else:
+        return k.C_LR, k.C_UR
