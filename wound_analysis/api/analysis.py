@@ -5,6 +5,8 @@ import imutils
 from imutils import perspective
 from imutils import contours
 
+import zipfile
+
 # Function imports
 import wound_analysis.api.processing_helpers as processing_helpers
 import wound_analysis.api.helpers as helpers
@@ -115,8 +117,6 @@ def custom_measure(image, sq_ratio, mask):
         return {"error": True}
 
 def grid_measurement(image, mask):
-    
-    processing_helpers.find_real_size(image, 1)
     masks = processing_helpers.extend_mask_search(mask)
     ratio, image = processing_helpers.find_real_size(image, 2.54)
     sq_ratio = ratio*ratio
@@ -131,6 +131,16 @@ def grid_measurement(image, mask):
     '''
     return custom_measure(image, real_width, mask)
     '''
+
+def zip_measurement(image, mask):
+    try:
+        ratio, image = processing_helpers.find_real_size(image, 2.54)
+        sq_ratio = ratio*ratio    
+        return_object = custom_measure(image, sq_ratio, mask)
+        return return_object
+    except:
+        return "Error in image measurement"
+
 def manual_area_adjustment(prev_data, increase_sat):
 
     if increase_sat:

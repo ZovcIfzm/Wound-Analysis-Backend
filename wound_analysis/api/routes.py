@@ -57,8 +57,6 @@ def zipMeasure():
     archive = zipfile.ZipFile(fileobj, 'r')
     namelist = archive.namelist()
 
-    imgfile = archive.open(namelist[0])
-
     ranges = helpers.dayMaskMapper(int(day))
     mask_map = {
         "lower_range": {
@@ -70,16 +68,19 @@ def zipMeasure():
             "second": ranges[1][1]
         }
     }
-    
-    # Convert image file to opencv format
-    pil_image = Image.open(imgfile).convert('RGB') 
-    opencv_image = np.array(pil_image) 
+    image_list = []
+    for img_name in namelist:
+        imgfile = archive.open(img_name)
 
-    # Convert RGB to BGR 
-    opencv_image = opencv_image[:, :, ::-1].copy() 
-    data_matrix = analysis.grid_measurement(opencv_image, mask_map)
+        # Convert image file to opencv format
+        pil_image = Image.open(imgfile).convert('RGB') 
+        opencv_image = np.array(pil_image) 
 
-    response = json.dumps(data_matrix)
+        # Convert RGB to BGR 
+        opencv_image = opencv_image[:, :, ::-1].copy() 
+        image_list.append(analysis.zip_measurement(opencv_image, mask_map))
+
+    response = json.dumps(image_list)
     return response
 
 @wound_analysis.app.route('/measure', methods=['POST', 'GET'])
