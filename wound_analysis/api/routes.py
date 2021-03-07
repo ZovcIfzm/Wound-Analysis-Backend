@@ -37,6 +37,7 @@ def get_current_time():
 
 
 @wound_analysis.app.route('/post/', methods=['POST', 'GET'])
+@cross_origin(supports_credentials=True)
 def post():
     print("reached post")
     fileobj = flask.request.files["file"]
@@ -47,11 +48,13 @@ def post():
 
 
 @wound_analysis.app.route('/testPrint/', methods=['POST', 'GET'])
+@cross_origin(supports_credentials=True)
 def show_time():
     print("tested")
     return {"test": "testedInFlask"}
 
 @wound_analysis.app.route('/zipMeasure', methods=['POST', 'GET'])
+@cross_origin(supports_credentials=True)
 def zipMeasure():
     
     fileobj = flask.request.files["file"]
@@ -105,6 +108,7 @@ def zipMeasure():
     return response
 
 @wound_analysis.app.route('/measure', methods=['POST', 'GET'])
+@cross_origin(supports_credentials=True)
 def measure():
     # Retrieve fields
     width = float(flask.request.form.get("width"))
@@ -150,6 +154,7 @@ def measure():
 
 
 @wound_analysis.app.route('/testImage', methods=['POST', 'GET'])
+@cross_origin(supports_credentials=True)
 def testImage():
 
     # Retrieve fields
@@ -169,6 +174,7 @@ def testImage():
 
 
 @wound_analysis.app.route('/testBase64', methods=['POST', 'GET'])
+@cross_origin(supports_credentials=True)
 def testBase64():
     
     lower_mask_one = str(flask.request.form.get("base64"))
@@ -176,11 +182,13 @@ def testBase64():
     return "tested"
 
 @wound_analysis.app.route('/', methods=['POST', 'GET'])
+@cross_origin(supports_credentials=True)
 def hello():
     """Return a friendly HTTP greeting."""
     return "This is the wound analysis api"
 
 @wound_analysis.app.route('/upload/',  methods=['POST', 'GET'])
+@cross_origin(supports_credentials=True)
 def upload():
     # Connect to database
     connection = wound_analysis.model.get_db()
@@ -210,10 +218,12 @@ def upload():
     return {"filename": filename}
     
 @wound_analysis.app.route('/database/', methods=['POST', 'GET'])
+@cross_origin(supports_credentials=True)
 def testDataBase():
     return "tested"
 
 @wound_analysis.app.route('/uploads/<path:filename>', methods=['POST', 'GET'])
+@cross_origin(supports_credentials=True)
 def download_file(filename):
     return flask.send_from_directory(wound_analysis.app.config['UPLOAD_FOLDER'],
                                     filename, as_attachment=True)
