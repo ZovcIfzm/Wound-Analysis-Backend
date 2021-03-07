@@ -61,15 +61,19 @@ def zipMeasure():
     archive = zipfile.ZipFile(fileobj, 'r')
     namelist = archive.namelist()
 
-    ranges = helpers.dayMaskMapper(int(day))
+    width = float(flask.request.form.get("width"))
+    lower_mask_one = str(flask.request.form.get("lower_mask_one"))
+    lower_mask_two = str(flask.request.form.get("lower_mask_two"))
+    upper_mask_one = str(flask.request.form.get("upper_mask_one"))
+    upper_mask_two = str(flask.request.form.get("upper_mask_two"))
     mask_map = {
         "lower_range": {
-            "first": ranges[0][0],
-            "second": ranges[0][1]
+            "first": helpers.convertStringToNumpyArray(lower_mask_one),
+            "second": helpers.convertStringToNumpyArray(lower_mask_two)
         },
         "upper_range": {
-            "first": ranges[1][0],
-            "second": ranges[1][1]
+            "first": helpers.convertStringToNumpyArray(upper_mask_one),
+            "second": helpers.convertStringToNumpyArray(upper_mask_two)
         }
     }
     image_list = []
@@ -93,7 +97,7 @@ def zipMeasure():
         # Convert RGB to BGR 
         opencv_image = opencv_image[:, :, ::-1].copy() 
 
-        obj = analysis.zip_measurement(opencv_image, mask_map)
+        obj = analysis.zip_measurement(opencv_image, mask_map, width=width)
         obj["orig"] = input_base64_image
         image_list.append(obj)
 
@@ -103,10 +107,9 @@ def zipMeasure():
 @wound_analysis.app.route('/measure', methods=['POST', 'GET'])
 def measure():
     # Retrieve fields
-    # width = float(flask.request.form.get("width"))
+    width = float(flask.request.form.get("width"))
     
     input_base64_image = flask.request.form.get("base64")
-    # print(input_base64_image[:40])
     b64_string = input_base64_image.split("data:image/jpeg;base64")[1]
     manual_width = flask.request.form.get("manual_width")
     if manual_width == "true":
@@ -131,22 +134,18 @@ def measure():
     # Convert image file to opencv format
     decoded = base64.b64decode(b64_string)
     ioed = io.BytesIO(decoded)
-    #img = imread(ioed)
-    #opencv_image = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
     image = Image.open(ioed)
     pil_image = image.convert('RGB') 
     opencv_image = np.array(pil_image) 
 
     # Convert RGB to BGR 
     opencv_image = opencv_image[:, :, ::-1].copy() 
-    print("manual width is: ", manual_width)
-    data_matrix = analysis.grid_measurement(opencv_image, mask_map, manual=manual_width)
+    data_matrix = analysis.grid_measurement(opencv_image, mask_map, manual=manual_width, width=width)
     for row in data_matrix:
         for col in row:
             col["orig"] = input_base64_image
 
     response = json.dumps(data_matrix)
-    #print(response)
     return response
 
 
