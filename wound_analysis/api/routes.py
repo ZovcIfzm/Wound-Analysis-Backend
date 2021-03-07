@@ -175,7 +175,7 @@ def testBase64():
     #print(response)
     return "tested"
 
-@wound_analysis.app.route('/')
+@wound_analysis.app.route('/', methods=['POST', 'GET'])
 def hello():
     """Return a friendly HTTP greeting."""
     return "This is the wound analysis api"
