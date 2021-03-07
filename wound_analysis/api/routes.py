@@ -92,7 +92,10 @@ def zipMeasure():
 
         # Convert RGB to BGR 
         opencv_image = opencv_image[:, :, ::-1].copy() 
-        image_list.append(analysis.zip_measurement(opencv_image, input_base64_image, mask_map))
+
+        obj = analysis.zip_measurement(opencv_image, mask_map)
+        obj["orig"] = input_base64_image
+        image_list.append(obj)
 
     response = json.dumps(image_list)
     return response
@@ -102,9 +105,8 @@ def measure():
     # Retrieve fields
     # width = float(flask.request.form.get("width"))
     
-    fileobj = flask.request.files["file"]
-    filename = fileobj.filename
     input_base64_image = flask.request.form.get("base64")
+    print(input_base64_image[:40])
     b64_string = input_base64_image.split("data:image/jpeg;base64")[1]
     
     lower_mask_one = str(flask.request.form.get("lower_mask_one"))
@@ -133,7 +135,10 @@ def measure():
 
     # Convert RGB to BGR 
     opencv_image = opencv_image[:, :, ::-1].copy() 
-    data_matrix = analysis.grid_measurement(opencv_image, input_base64_image, mask_map)
+    data_matrix = analysis.grid_measurement(opencv_image, mask_map)
+    for row in data_matrix:
+        for col in row:
+            col["orig"] = input_base64_image
 
     response = json.dumps(data_matrix)
     #print(response)

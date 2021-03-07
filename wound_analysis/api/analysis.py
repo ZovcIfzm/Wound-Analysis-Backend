@@ -34,9 +34,8 @@ def measurement(image, rec_image, sq_ratio, lower_range, upper_range):
             "areas": [],
             "lower_range": lower_range,
             "upper_range": upper_range,
-            "original_image": image,
             "sq_ratio": sq_ratio,
-            "error": False}
+            "error": True}
         
     
     areas = processing_helpers.measure_area(cnts, sq_ratio)
@@ -51,45 +50,16 @@ def measurement(image, rec_image, sq_ratio, lower_range, upper_range):
             "sq_ratio": sq_ratio,
             "error": False}
 
-
-def optimized_masking_measurement(image, real_width):
-    cur_lower_range = DEF_LOWER_RANGE
-    cur_upper_range = DEF_UPPER_RANGE
-    sq_ratio = helpers.find_sq_ratio(image, real_width)
-    for i in range(10):
-        data = measurement(image, sq_ratio, cur_lower_range, cur_upper_range)
-        areas = data["areas"]
-        if areas == []:
-            cur_lower_range[0][1] *= 0.9
-            cur_lower_range[1][1] *= 0.9
-            print("increasing num")
-        elif areas[len(areas)-1] > AREA_UPPER_LIMIT:
-            cur_lower_range[0][1] *= 1.1
-            cur_lower_range[1][1] *= 1.1
-            print("decreasing num")
-        else:
-            break
-        
-    if data is not {}:
-        return {"drawn_image": data["drawn_image"],
-                "areas": areas,
-                "lower_range": cur_lower_range,
-                "upper_range": cur_upper_range,
-                "sq_ratio": sq_ratio,
-                "error": False}
-    else:
-        return {"error": True}
-
 def custom_measure(image, rec_image, sq_ratio, mask):
     cur_lower_range = np.array([np.array(mask["lower_range"]["first"]), np.array(mask["lower_range"]["second"])])
     cur_upper_range = np.array([np.array(mask["upper_range"]["first"]), np.array(mask["upper_range"]["second"])])
     
     data = measurement(image, rec_image, sq_ratio, cur_lower_range, cur_upper_range) 
-    areas = data["areas"]
-    if data is not {}:
+    
+    if data["error"] is False:
         return {"drawn_image": helpers.convertNumpyImageToString(data["drawn_image"]),
                 "edged_image": helpers.convertNumpyImageToString(data["edged_image"]),
-                "areas": areas,
+                "areas": data["areas"],
                 "lower_range": cur_lower_range.tolist(),
                 "upper_range": cur_upper_range.tolist(),
                 "sq_ratio": sq_ratio,
@@ -97,30 +67,35 @@ def custom_measure(image, rec_image, sq_ratio, mask):
     else:
         return {"error": True}
 
-def grid_measurement(image, orig, mask):
+def grid_measurement(image, mask, width=2.54, manual=False):
     masks = processing_helpers.extend_mask_search(mask)
-    ratio, rec_image = processing_helpers.find_real_size(image, 2.54)
-    sq_ratio = ratio*ratio
     matrix = []
-    for i in range(3):
-        row = []
-        for j in range(3):
-            obj = custom_measure(image, rec_image, sq_ratio, masks[i][j])
-            obj["orig"] = orig
-            row.append(obj)
-        matrix.append(row)
+    try:
+        ratio, rec_image = processing_helpers.find_real_size(image, width)
+        sq_ratio = ratio*ratio
+        for i in range(3):
+            row = []
+            for j in range(3):
+                obj = custom_measure(image, rec_image, sq_ratio, masks[i][j])
+                row.append(obj)
+            matrix.append(row)
+    except:
+        for i in range(3):
+            row = []
+            for j in range(3):
+                row.append({"error": True})
+            matrix.append(row)
 
     return matrix
 
-def zip_measurement(image, orig, mask):
+def zip_measurement(image, mask, width=2.54, manual=False):
     try:
-        ratio, rec_image = processing_helpers.find_real_size(image, 2.54)
+        ratio, rec_image = processing_helpers.find_real_size(image, width)
         sq_ratio = ratio*ratio    
         return_object = custom_measure(image, rec_image, sq_ratio, mask)
-        return_object["orig"] = orig
         return return_object
     except:
-        return "Error in image measurement"
+        return {"error": True}
 
 def manual_area_adjustment(prev_data, increase_sat):
 

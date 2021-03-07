@@ -9,17 +9,17 @@ A_UR = [np.array([15, 255, 200]), np.array([180, 255, 200])]
 B_LR = [np.array([0, 95, 140]), np.array([165, 95, 140])]
 B_UR = [np.array([15, 255, 197]), np.array([180, 255, 197])]
 
-C_LR = [np.array([0, 100, 20]), np.array([150, 100, 20])]
-C_UR = [np.array([30, 255, 177]), np.array([180, 255, 177])]
+C_LR = [np.array([0, 100, 140]), np.array([165, 100, 140])]
+C_UR = [np.array([15, 255, 177]), np.array([180, 255, 177])]
 
-D_LR = [np.array([0, 105, 20]), np.array([150, 105, 20])]
-D_UR = [np.array([30, 255, 167]), np.array([180, 255, 167])]
+D_LR = [np.array([0, 105, 140]), np.array([165, 105, 140])]
+D_UR = [np.array([15, 255, 167]), np.array([180, 255, 167])]
 
-E_LR = [np.array([0, 110, 0]), np.array([150, 110, 0])]
-E_UR = [np.array([30, 255, 153]), np.array([180, 255, 153])]
+E_LR = [np.array([0, 110, 50]), np.array([165, 110, 50])]
+E_UR = [np.array([15, 255, 153]), np.array([180, 255, 153])]
 
-F_LR = [np.array([0, 110, 0]), np.array([150, 110, 0])]
-F_UR = [np.array([30, 255, 140]), np.array([180, 255, 140])]
+F_LR = [np.array([0, 110, 50]), np.array([165, 110, 50])]
+F_UR = [np.array([15, 255, 140]), np.array([180, 255, 140])]
 
 ORIG_LOWER_RANGE = [np.array([0, 30, 30]), np.array([130, 30, 30])]
 ORIG_UPPER_RANGE = [np.array([40, 255, 255]), np.array([180, 255, 255])]
