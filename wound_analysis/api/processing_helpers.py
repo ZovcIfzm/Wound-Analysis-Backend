@@ -119,11 +119,6 @@ def extend_mask_search(mask):
         matrix.append(copy.deepcopy(row))
 
     return matrix
-    '''
-    for i, row in enumerate(matrix):
-        for j, col in enumerate(row):
-            print(matrix[i][j])
-    '''
 
 def find_real_size(img, width):
     # load the image, convert it to grayscale, and blur it slightly
@@ -156,7 +151,6 @@ def find_real_size(img, width):
         # if the contour is not sufficiently large, ignore it
         if cv2.contourArea(c) < 10000:
             continue
-        print("a countour")
         # compute the rotated bounding box of the contour
         box = cv2.minAreaRect(c)
         box = cv2.cv.BoxPoints(box) if imutils.is_cv2() else cv2.boxPoints(box)
@@ -205,8 +199,6 @@ def find_real_size(img, width):
         # if the pixels per metric has not been initialized, then
         # compute it as the ratio of pixels to supplied metric
         # (in this case, inches)
-        print("dA:", dA)
-        print("dB:", dB)
         if dA > dB:
             pixelsPerMetric = dA / width
         else:

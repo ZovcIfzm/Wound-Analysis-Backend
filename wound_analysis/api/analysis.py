@@ -73,17 +73,13 @@ def grid_measurement(image, mask, width=2.54, manual=False):
     try:
         sq_ratio = None
         rec_image = None
-        print("before manual")
         if not manual:
-            print("automatic")
             ratio, rec_image = processing_helpers.find_real_size(image, width)
             sq_ratio = ratio*ratio
         else:
-            print("manual run")
             sq_ratio = helpers.find_sq_ratio(image, width)
             rec_image = image
 
-        print("passed manual inspection")
         for i in range(3):
             row = []
             for j in range(3):
