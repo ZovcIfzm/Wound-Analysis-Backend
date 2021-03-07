@@ -106,9 +106,13 @@ def measure():
     # width = float(flask.request.form.get("width"))
     
     input_base64_image = flask.request.form.get("base64")
-    print(input_base64_image[:40])
+    # print(input_base64_image[:40])
     b64_string = input_base64_image.split("data:image/jpeg;base64")[1]
-    
+    manual_width = flask.request.form.get("manual_width")
+    if manual_width == "true":
+        manual_width = True
+    else:
+        manual_width = False
     lower_mask_one = str(flask.request.form.get("lower_mask_one"))
     lower_mask_two = str(flask.request.form.get("lower_mask_two"))
     upper_mask_one = str(flask.request.form.get("upper_mask_one"))
@@ -135,7 +139,8 @@ def measure():
 
     # Convert RGB to BGR 
     opencv_image = opencv_image[:, :, ::-1].copy() 
-    data_matrix = analysis.grid_measurement(opencv_image, mask_map)
+    print("manual width is: ", manual_width)
+    data_matrix = analysis.grid_measurement(opencv_image, mask_map, manual=manual_width)
     for row in data_matrix:
         for col in row:
             col["orig"] = input_base64_image

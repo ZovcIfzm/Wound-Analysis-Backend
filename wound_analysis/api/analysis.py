@@ -71,8 +71,19 @@ def grid_measurement(image, mask, width=2.54, manual=False):
     masks = processing_helpers.extend_mask_search(mask)
     matrix = []
     try:
-        ratio, rec_image = processing_helpers.find_real_size(image, width)
-        sq_ratio = ratio*ratio
+        sq_ratio = None
+        rec_image = None
+        print("before manual")
+        if not manual:
+            print("automatic")
+            ratio, rec_image = processing_helpers.find_real_size(image, width)
+            sq_ratio = ratio*ratio
+        else:
+            print("manual run")
+            sq_ratio = helpers.find_sq_ratio(image, width)
+            rec_image = image
+
+        print("passed manual inspection")
         for i in range(3):
             row = []
             for j in range(3):
@@ -83,19 +94,25 @@ def grid_measurement(image, mask, width=2.54, manual=False):
         for i in range(3):
             row = []
             for j in range(3):
-                row.append({"error": True})
+                row.append({"error": True, "error_message": "Can't identify green line. Please set to manual."})
             matrix.append(row)
 
     return matrix
 
 def zip_measurement(image, mask, width=2.54, manual=False):
     try:
-        ratio, rec_image = processing_helpers.find_real_size(image, width)
-        sq_ratio = ratio*ratio    
+        sq_ratio = None
+        rec_image = None
+        if not manual:
+            ratio, rec_image = processing_helpers.find_real_size(image, width)
+            sq_ratio = ratio*ratio
+        else:
+            sq_ratio = helpers.find_sq_ratio(image, width)
+            rec_image = image
         return_object = custom_measure(image, rec_image, sq_ratio, mask)
         return return_object
     except:
-        return {"error": True}
+        return {"error": True, "error_message": "Can't identify green line. Please set to manual"}
 
 def manual_area_adjustment(prev_data, increase_sat):
 
