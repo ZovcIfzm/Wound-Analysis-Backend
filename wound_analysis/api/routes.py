@@ -23,6 +23,8 @@ import zipfile
 
 import wound_analysis.api.analysis as analysis
 import wound_analysis.api.helpers as helpers
+
+from flask_cors import CORS, cross_origin
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
 # called `app` in `main.py`.
 
