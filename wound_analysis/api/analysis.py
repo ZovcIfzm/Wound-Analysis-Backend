@@ -65,7 +65,7 @@ def custom_measure(image, rec_image, sq_ratio, mask):
                 "sq_ratio": sq_ratio,
                 "error": False}
     else:
-        return {"error": True}
+        return {"error": True, "error_message": "Can't find wounds"}
 
 def grid_measurement(image, mask, width=2.54, manual=False):
     masks = processing_helpers.extend_mask_search(mask)
@@ -87,6 +87,7 @@ def grid_measurement(image, mask, width=2.54, manual=False):
                 row.append(obj)
             matrix.append(row)
     except:
+        matrix = []
         for i in range(3):
             row = []
             for j in range(3):
@@ -108,7 +109,7 @@ def zip_measurement(image, mask, width=2.54, manual=False):
         return_object = custom_measure(image, rec_image, sq_ratio, mask)
         return return_object
     except:
-        return {"error": True, "error_message": "Can't identify green line. Please set to manual"}
+        return {"error": True, "error_message": "Can't identify green line."}
 
 def manual_area_adjustment(prev_data, increase_sat):
 

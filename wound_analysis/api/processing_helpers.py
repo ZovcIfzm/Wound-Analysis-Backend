@@ -111,10 +111,10 @@ def extend_mask_search(mask):
         row = []
         for j in range(3):
             new_mask = copy.deepcopy(masks)
-            new_mask["upper_range"]["first"][1] += step_dictionary["Sat_" + str(i)]
-            new_mask["upper_range"]["first"][2] += step_dictionary["Val_" + str(j)]
-            new_mask["upper_range"]["second"][1] += step_dictionary["Sat_" + str(i)]
-            new_mask["upper_range"]["second"][2] += step_dictionary["Val_" + str(j)]
+            new_mask["lower_range"]["first"][1] += step_dictionary["Sat_" + str(i)]
+            new_mask["lower_range"]["first"][2] += step_dictionary["Val_" + str(j)]
+            new_mask["lower_range"]["second"][1] += step_dictionary["Sat_" + str(i)]
+            new_mask["lower_range"]["second"][2] += step_dictionary["Val_" + str(j)]
             row.append(copy.deepcopy(new_mask))
         matrix.append(copy.deepcopy(row))
 
@@ -126,7 +126,7 @@ def find_real_size(img, width):
     overlay_img = img.copy()
 
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    mask = cv2.inRange(hsv, (20,60,50), (50,140,190))
+    mask = cv2.inRange(hsv, (20,60,60), (75,140,190))
     image = cv2.bitwise_and(image, image, mask=mask)
     #image[mask > 0] = (255, 255, 255)
 
@@ -149,7 +149,7 @@ def find_real_size(img, width):
     orig = overlay_img.copy()
     for c in cnts:
         # if the contour is not sufficiently large, ignore it
-        if cv2.contourArea(c) < 10000:
+        if cv2.contourArea(c) < 1000:
             continue
         # compute the rotated bounding box of the contour
         box = cv2.minAreaRect(c)
@@ -165,10 +165,6 @@ def find_real_size(img, width):
         cv2.drawContours(orig, [box.astype("int")], -1, (255, 0, 0), 2)
         # Also draw for returned image (normal image + lines)
         cv2.drawContours(overlay_img, [box.astype("int")], -1, (255, 0, 0), 2)
-
-        # loop over the original points and draw them
-        for (x, y) in box:
-            cv2.circle(orig, (int(x), int(y)), 5, (0, 0, 255), -1)
         
         # unpack the ordered bounding box, then compute the midpoint
         # between the top-left and top-right coordinates, followed by
@@ -180,18 +176,6 @@ def find_real_size(img, width):
         # followed by the midpoint between the top-righ and bottom-right
         (tlblX, tlblY) = midpoint(tl, bl)
         (trbrX, trbrY) = midpoint(tr, br)
-        
-
-        # draw the midpoints on the image
-        cv2.circle(orig, (int(tltrX), int(tltrY)), 5, (255, 0, 0), -1)
-        cv2.circle(orig, (int(blbrX), int(blbrY)), 5, (255, 0, 0), -1)
-        cv2.circle(orig, (int(tlblX), int(tlblY)), 5, (255, 0, 0), -1)
-        cv2.circle(orig, (int(trbrX), int(trbrY)), 5, (255, 0, 0), -1)
-        # draw lines between the midpoints
-        cv2.line(orig, (int(tltrX), int(tltrY)), (int(blbrX), int(blbrY)),
-            (255, 0, 255), 2)
-        cv2.line(orig, (int(tlblX), int(tlblY)), (int(trbrX), int(trbrY)),
-            (255, 0, 255), 2)
         
         # compute the Euclidean distance between the midpoints
         dA = dist.euclidean((tltrX, tltrY), (blbrX, blbrY))
@@ -210,12 +194,9 @@ def find_real_size(img, width):
         
 
         # draw the object sizes on the image
-        cv2.putText(orig, "{:.1f}u".format(dimB),
+        cv2.putText(orig, "{:.2f} cm".format(dimB),
             (int(tltrX - 15), int(tltrY - 10)), cv2.FONT_HERSHEY_SIMPLEX,
-            0.65, (255, 255, 255), 2)
-        cv2.putText(orig, "{:.1f}u".format(dimA),
-            (int(trbrX + 10), int(trbrY)), cv2.FONT_HERSHEY_SIMPLEX,
-            0.65, (255, 255, 255), 2)
+            0.65, (255, 0, 0), 2)
 
         # show the output image
         #_orig = cv2.resize(orig, (1250,1250))
