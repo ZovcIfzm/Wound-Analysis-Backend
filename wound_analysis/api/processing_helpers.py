@@ -40,8 +40,8 @@ def measure_area(contours, sq_ratio):
     for cont in contours:
         cont_area = cv2.contourArea(cont)/sq_ratio
         # if the contour is not sufficiently large, ignore it
-        if cont_area < k.AREA_LOWER_LIMIT:
-            continue
+        #if cont_area < k.AREA_LOWER_LIMIT:
+        #    continue
 
         areas.append(cont_area)
     return areas
@@ -126,7 +126,7 @@ def find_real_size(img, width):
     overlay_img = img.copy()
 
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    mask = cv2.inRange(hsv, (20,60,60), (50,140,170))
+    mask = cv2.inRange(hsv, (20,60,50), (50,140,190))
     image = cv2.bitwise_and(image, image, mask=mask)
     #image[mask > 0] = (255, 255, 255)
 

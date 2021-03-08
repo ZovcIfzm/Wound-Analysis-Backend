@@ -61,7 +61,6 @@ def zipMeasure():
     
     fileobj = flask.request.files["file"]
     filename = fileobj.filename
-    day = filename.split(".zip")[0]
 
     archive = zipfile.ZipFile(fileobj, 'r')
     namelist = archive.namelist()
@@ -101,7 +100,14 @@ def zipMeasure():
 
         # Convert RGB to BGR 
         opencv_image = opencv_image[:, :, ::-1].copy() 
-
+        
+        small_to_large_image_size_ratio = 0.5
+        opencv_image = cv2.GaussianBlur(opencv_image, (3, 3), cv2.BORDER_DEFAULT)
+        opencv_image = cv2.resize(opencv_image, # original image
+                                (0,0), # set fx and fy, not the final size
+                                fx=small_to_large_image_size_ratio, 
+                                fy=small_to_large_image_size_ratio, 
+                                interpolation=cv2.INTER_NEAREST)
         obj = analysis.zip_measurement(opencv_image, mask_map, width=width)
         obj["orig"] = input_base64_image
         image_list.append(obj)
@@ -146,6 +152,14 @@ def measure():
 
     # Convert RGB to BGR 
     opencv_image = opencv_image[:, :, ::-1].copy() 
+    
+    small_to_large_image_size_ratio = 0.5
+    opencv_image = cv2.GaussianBlur(opencv_image, (3, 3), cv2.BORDER_DEFAULT)
+    opencv_image = cv2.resize(opencv_image, # original image
+                            (0,0), # set fx and fy, not the final size
+                            fx=small_to_large_image_size_ratio, 
+                            fy=small_to_large_image_size_ratio, 
+                            interpolation=cv2.INTER_NEAREST)
     data_matrix = analysis.grid_measurement(opencv_image, mask_map, manual=manual_width, width=width)
     for row in data_matrix:
         for col in row:
