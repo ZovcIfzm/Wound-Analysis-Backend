@@ -192,12 +192,15 @@ def find_real_size(img, width):
         dimA = dA / pixelsPerMetric
         dimB = dB / pixelsPerMetric
         
-
         # draw the object sizes on the image
-        cv2.putText(orig, "{:.2f} cm".format(dimB),
-            (int(tltrX - 15), int(tltrY - 10)), cv2.FONT_HERSHEY_SIMPLEX,
-            0.65, (255, 0, 0), 2)
-
+        if (dA > dB):
+            cv2.putText(orig, "{:.2f} cm".format(dimA),
+                (int(tltrX - 15), int(tltrY - 10)), cv2.FONT_HERSHEY_SIMPLEX,
+                0.65, (255, 0, 0), 2)
+        else:
+            cv2.putText(orig, "{:.2f}in".format(dimB),
+                (int(trbrX + 10), int(trbrY)), cv2.FONT_HERSHEY_SIMPLEX,
+                0.65, (255, 0, 0), 2)
         # show the output image
         #_orig = cv2.resize(orig, (1250,1250))
         #cv2.imshow("Image", _orig) 
