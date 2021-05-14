@@ -25,7 +25,7 @@ def measurement(image, rec_image, sq_ratio, lower_range, upper_range):
     
     edged = cv2.dilate(edged, None, iterations=1)
     cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL,
-                            cv2.CHAIN_APPROX_SIMPLE)
+                            cv2.CHAIN_APPROX_NONE)
     cnts = imutils.grab_contours(cnts)
     try:
         (cnts, _) = contours.sort_contours(cnts)

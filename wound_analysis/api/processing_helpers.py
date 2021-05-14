@@ -139,7 +139,7 @@ def find_real_size(img, width):
     edged = cv2.erode(edged, None, iterations=1)
     # find contours in the edge map
     cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL,
-        cv2.CHAIN_APPROX_SIMPLE)
+        cv2.CHAIN_APPROX_NONE)
     cnts = imutils.grab_contours(cnts)
     # sort the contours from left-to-right and initialize the
     # 'pixels per metric' calibration variable
