@@ -101,7 +101,7 @@ def zipMeasure():
         # Convert RGB to BGR 
         opencv_image = opencv_image[:, :, ::-1].copy() 
         
-        small_to_large_image_size_ratio = 0.5
+        small_to_large_image_size_ratio = 0.25
         opencv_image = cv2.GaussianBlur(opencv_image, (3, 3), cv2.BORDER_DEFAULT)
         opencv_image = cv2.resize(opencv_image, # original image
                                 (0,0), # set fx and fy, not the final size
@@ -153,7 +153,7 @@ def measure():
     # Convert RGB to BGR 
     opencv_image = opencv_image[:, :, ::-1].copy() 
     
-    small_to_large_image_size_ratio = 0.5
+    small_to_large_image_size_ratio = 0.25
     opencv_image = cv2.GaussianBlur(opencv_image, (3, 3), cv2.BORDER_DEFAULT)
     opencv_image = cv2.resize(opencv_image, # original image
                             (0,0), # set fx and fy, not the final size
