@@ -162,9 +162,9 @@ def find_real_size(img, width):
         
         box = perspective.order_points(box)
         
-        cv2.drawContours(orig, [box.astype("int")], -1, (255, 0, 0), 2)
+        cv2.drawContours(orig, [box.astype("int")], -1, (255, 0, 0), 1)
         # Also draw for returned image (normal image + lines)
-        cv2.drawContours(overlay_img, [box.astype("int")], -1, (255, 0, 0), 2)
+        cv2.drawContours(overlay_img, [box.astype("int")], -1, (255, 0, 0), 1)
         
         # unpack the ordered bounding box, then compute the midpoint
         # between the top-left and top-right coordinates, followed by

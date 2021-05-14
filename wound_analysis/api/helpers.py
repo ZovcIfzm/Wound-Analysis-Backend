@@ -48,7 +48,7 @@ def draw_contours(image_background, contours, sq_ratio):
         if cont_area < k.AREA_LOWER_LIMIT:
             continue
 
-        cv2.drawContours(image_background, cont, -1, (0, 255, 0), 2)
+        cv2.drawContours(image_background, cont, -1, (0, 255, 0), 1)
 
 
 def convertStringToNumpyArray(mask_string):
