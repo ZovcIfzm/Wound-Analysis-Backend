@@ -8,9 +8,9 @@ from tensorflow.keras import Model, Sequential  # type: ignore
 from tensorflow.keras.layers import InputLayer  # type: ignore
 from tensorflow.keras.optimizers import Adam  # type: ignore
 from tensorflow.keras.callbacks import ModelCheckpoint  # type: ignore
-from data_process import gpu_init, generate_pairs, load_data, split_pairs
-from model import get_siamese_model
-from model import SIAMESE_FILE, HYP_FILE, ENCODER_FILE, DENSE_FILE
+from wound_analysis.api.siamese_model.data_process import gpu_init, generate_pairs, load_data, split_pairs
+from wound_analysis.api.siamese_model.model import get_siamese_model
+from wound_analysis.api.siamese_model.model import SIAMESE_FILE, HYP_FILE, ENCODER_FILE, DENSE_FILE
 
 
 def compute_class_weights(y_train: np.ndarray) -> Dict[int, float]:

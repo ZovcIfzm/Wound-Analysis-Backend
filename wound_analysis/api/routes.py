@@ -1,5 +1,6 @@
 
 # [START gae_python38_app]
+from wound_analysis.api.siamese_model.predict import predict
 import flask
 import os
 from werkzeug.utils import secure_filename
@@ -23,10 +24,13 @@ import zipfile
 
 import wound_analysis.api.analysis as analysis
 import wound_analysis.api.helpers as helpers
+import wound_analysis.api.siamese_model.predict as siamese
+import wound_analysis.api.constants as k
 
 from flask_cors import CORS, cross_origin
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
 # called `app` in `main.py`.
+from flask import current_app
 
 @wound_analysis.app.route('/time/')
 def get_current_time():
@@ -101,24 +105,12 @@ def measure():
     input_base64_image = flask.request.form.get("base64")
     b64_string = input_base64_image.split("data:image/jpeg;base64")[1]
     manual_width = flask.request.form.get("manual_width")
-    if manual_width == "true":
-        manual_width = True
-    else:
-        manual_width = False
-    lower_mask_one = str(flask.request.form.get("lower_mask_one"))
-    lower_mask_two = str(flask.request.form.get("lower_mask_two"))
-    upper_mask_one = str(flask.request.form.get("upper_mask_one"))
-    upper_mask_two = str(flask.request.form.get("upper_mask_two"))
-    mask_map = {
-        "lower_range": {
-            "first": helpers.convertStringToNumpyArray(lower_mask_one),
-            "second": helpers.convertStringToNumpyArray(lower_mask_two)
-        },
-        "upper_range": {
-            "first": helpers.convertStringToNumpyArray(upper_mask_one),
-            "second": helpers.convertStringToNumpyArray(upper_mask_two)
-        }
-    }
+    manual_mask = flask.request.form.get("manual_mask")
+
+    print("DEBUG: raw manual_mask:", manual_mask)
+    print("DEBUG: raw manual_width:", manual_width)
+    manual_width = True if manual_width == "true" else False
+    manual_mask = True if manual_mask == "true" else False
 
     # Convert image file to opencv format
     decoded = base64.b64decode(b64_string)
@@ -137,6 +129,36 @@ def measure():
                             fx=small_to_large_image_size_ratio, 
                             fy=small_to_large_image_size_ratio, 
                             interpolation=cv2.INTER_NEAREST)
+    lower_mask_one, lower_mask_two, upper_mask_one, upper_mask_two = None, None, None, None
+    print("DEBUG: manual_mask", manual_mask)
+    # Find mask
+    if manual_mask:
+        print("DEBUG: manual_mask not run")
+        lower_mask_one = helpers.convertStringToNumpyArray(str(flask.request.form.get("lower_mask_one")))
+        lower_mask_two = helpers.convertStringToNumpyArray(str(flask.request.form.get("lower_mask_two")))
+        upper_mask_one = helpers.convertStringToNumpyArray(str(flask.request.form.get("upper_mask_one")))
+        upper_mask_two = helpers.convertStringToNumpyArray(str(flask.request.form.get("upper_mask_two")))
+    else:
+        print("DEBUG: manual_mask run")
+        mask_list = [(k.A_LR, k.A_UR), (k.B_LR, k.B_UR), (k.C_LR, k.C_UR), (k.D_LR, k.D_UR), (k.E_LR, k.E_UR)]
+        predicted_mask = siamese.predict(image, current_app.config["MODEL_PATH"])
+        lower_mask_one = mask_list[predicted_mask][0][0]
+        lower_mask_two = mask_list[predicted_mask][0][1]
+        upper_mask_one = mask_list[predicted_mask][1][0]
+        upper_mask_two = mask_list[predicted_mask][1][1]
+        print("DEBUG: manual_mask predicted mask = ", predicted_mask)
+
+    mask_map = {
+        "lower_range": {
+            "first": lower_mask_one,
+            "second": lower_mask_two
+        },
+        "upper_range": {
+            "first": upper_mask_one,
+            "second": upper_mask_two
+        }
+    }
+
     data_matrix = analysis.grid_measurement(opencv_image, mask_map, manual=manual_width, width=width)
     for row in data_matrix:
         for col in row:

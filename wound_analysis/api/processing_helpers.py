@@ -51,37 +51,7 @@ def extend_mask_search(mask):
     lower_mask_two = np.array(mask["lower_range"]["second"])
     upper_mask_one = np.array(mask["upper_range"]["first"])
     upper_mask_two = np.array(mask["upper_range"]["second"])
-    '''
-    step_dictionary = {
-        "Sat_0": -k.SAT_STEP_3,
-        "Sat_1": -k.SAT_STEP_2,
-        "Sat_2": -k.SAT_STEP_1,
-        "Sat_3": 0,
-        "Sat_4": k.SAT_STEP_1,
-        "Sat_5": k.SAT_STEP_2,
-        "Sat_6": k.SAT_STEP_3,
-        "Val_0": -k.VAL_STEP_3,
-        "Val_1": -k.VAL_STEP_2,
-        "Val_2": -k.VAL_STEP_1,
-        "Val_3": 0,
-        "Val_4": k.VAL_STEP_1,
-        "Val_5": k.VAL_STEP_2,
-        "Val_6": k.VAL_STEP_3
-    }
     
-    step_dictionary = {
-        "Sat_0": -k.SAT_STEP_2,
-        "Sat_1": -k.SAT_STEP_1,
-        "Sat_2": 0,
-        "Sat_3": k.SAT_STEP_1,
-        "Sat_4": k.SAT_STEP_2,
-        "Val_0": -k.VAL_STEP_2,
-        "Val_1": -k.VAL_STEP_1,
-        "Val_2": 0,
-        "Val_3": k.VAL_STEP_1,
-        "Val_4": k.VAL_STEP_2,
-    }
-    '''
     step_dictionary = {
         "Sat_0": -k.SAT_STEP_3,
         "Sat_1": 0,
