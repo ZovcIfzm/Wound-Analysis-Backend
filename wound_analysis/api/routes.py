@@ -28,32 +28,9 @@ from flask_cors import CORS, cross_origin
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
 # called `app` in `main.py`.
 
-global test_val
-test_val = 0
-global data
-data = {}
-
 @wound_analysis.app.route('/time/')
 def get_current_time():
     return {'time': time.time()}
-
-
-@wound_analysis.app.route('/post/', methods=['POST', 'GET'])
-@cross_origin(supports_credentials=True)
-def post():
-    print("reached post")
-    fileobj = flask.request.files["file"]
-
-    fileobj.save(os.path.join(wound_analysis.app.root_path, "cur_image.jpg"))
-    print("post saved")
-    return flask.redirect("/")
-
-
-@wound_analysis.app.route('/testPrint/', methods=['POST', 'GET'])
-@cross_origin(supports_credentials=True)
-def show_time():
-    print("tested")
-    return {"test": "testedInFlask"}
 
 @wound_analysis.app.route('/zipMeasure', methods=['POST', 'GET'])
 @cross_origin(supports_credentials=True)
@@ -188,68 +165,8 @@ def testImage():
     #print(response)
     return response
 
-
-@wound_analysis.app.route('/testBase64', methods=['POST', 'GET'])
-@cross_origin(supports_credentials=True)
-def testBase64():
-    
-    lower_mask_one = str(flask.request.form.get("base64"))
-    #print(response)
-    return "tested"
-
 @wound_analysis.app.route('/', methods=['POST', 'GET'])
 @cross_origin(supports_credentials=True)
 def hello():
     """Return a friendly HTTP greeting."""
     return "This is the wound analysis api"
-
-@wound_analysis.app.route('/upload/',  methods=['POST', 'GET'])
-@cross_origin(supports_credentials=True)
-def upload():
-    # Connect to database
-    connection = wound_analysis.model.get_db()
-
-    fileobj = flask.request.files["file"]
-    filename = fileobj.filename
-
-    # Compute base name (filename without directory).  We use a UUID
-    # to avoid clashes with existing files, and ensure that the name
-    # is compatible with the filesystem.
-    uuid_basename = filename
-    '''
-    uuid_basename = "{stem}{suffix}".format(
-        stem=uuid.uuid4().hex,
-        suffix=pathlib.Path(filename).suffix
-    )'''
-
-    # Save to disk
-    path = wound_analysis.app.config["UPLOAD_FOLDER"]/uuid_basename
-    fileobj.save(path)
-    
-    '''
-    connection.execute(
-        "INSERT INTO images(filename)"
-        "VALUES(?)", (uuid_basename,)
-    )'''
-    return {"filename": filename}
-    
-@wound_analysis.app.route('/database/', methods=['POST', 'GET'])
-@cross_origin(supports_credentials=True)
-def testDataBase():
-    return "tested"
-
-@wound_analysis.app.route('/uploads/<path:filename>', methods=['POST', 'GET'])
-@cross_origin(supports_credentials=True)
-def download_file(filename):
-    return flask.send_from_directory(wound_analysis.app.config['UPLOAD_FOLDER'],
-                                    filename, as_attachment=True)
-
-def parse_url(url):
-    split_url = url.split('\\')
-    return "\\\\".join(split_url)
-
-def parse_display(url):
-    split_url = url.split('\\\\')
-    return "".join(split_url)
-
-# [END gae_python38_app]
