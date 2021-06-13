@@ -33,7 +33,7 @@ def get_current_time():
     return {'time': time.time()}
 
 @wound_analysis.app.route('/zipMeasure', methods=['POST', 'GET'])
-@cross_origin()
+@cross_origin(supports_credentials=True)
 def zipMeasure():
     
     fileobj = flask.request.files["file"]
@@ -93,7 +93,7 @@ def zipMeasure():
     return response
 
 @wound_analysis.app.route('/measure', methods=['POST', 'GET'])
-@cross_origin()
+@cross_origin(supports_credentials=True)
 def measure():
     # Retrieve fields
     width = float(flask.request.form.get("width"))
@@ -147,7 +147,7 @@ def measure():
 
 
 @wound_analysis.app.route('/testImage', methods=['POST', 'GET'])
-@cross_origin()
+@cross_origin(supports_credentials=True)
 def testImage():
 
     # Retrieve fields
@@ -166,12 +166,7 @@ def testImage():
     return response
 
 @wound_analysis.app.route('/', methods=['POST', 'GET'])
-@cross_origin()
+@cross_origin(supports_credentials=True)
 def hello():
     """Return a friendly HTTP greeting."""
     return "This is the wound analysis api"
-
-@wound_analysis.app.route("/testPage", methods=['POST', 'GET'])
-@cross_origin()
-def testPage():
-    return "<h1>Test Page</h1>"
