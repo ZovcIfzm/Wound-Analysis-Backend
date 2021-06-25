@@ -152,13 +152,13 @@ def measure():
     print("DEBUG: manual_mask", manual_mask)
     # Find mask
     if manual_mask:
-        print("DEBUG: manual_mask not run")
+        print("DEBUG: manual_mask run")
         lower_mask_one = helpers.convertStringToNumpyArray(str(flask.request.form.get("lower_mask_one")))
         lower_mask_two = helpers.convertStringToNumpyArray(str(flask.request.form.get("lower_mask_two")))
         upper_mask_one = helpers.convertStringToNumpyArray(str(flask.request.form.get("upper_mask_one")))
         upper_mask_two = helpers.convertStringToNumpyArray(str(flask.request.form.get("upper_mask_two")))
     else:
-        print("DEBUG: manual_mask run")
+        print("DEBUG: manual_mask not run")
         mask_list = [(k.A_LR, k.A_UR), (k.B_LR, k.B_UR), (k.C_LR, k.C_UR), (k.D_LR, k.D_UR), (k.E_LR, k.E_UR)]
         obj = {"b64img": b64_string}
         predicted_mask = int(requests.post(k.ML_API, json=obj).text)
