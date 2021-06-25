@@ -1,6 +1,5 @@
 
 # [START gae_python38_app]
-from wound_analysis.api.siamese_model.predict import predict
 import flask
 import os
 import cv2
@@ -19,7 +18,6 @@ import zipfile
 
 import wound_analysis.api.analysis as analysis
 import wound_analysis.api.helpers as helpers
-import wound_analysis.api.siamese_model.predict as siamese
 import wound_analysis.api.constants as k
 
 from flask_cors import CORS, cross_origin
