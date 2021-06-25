@@ -3,20 +3,15 @@
 from wound_analysis.api.siamese_model.predict import predict
 import flask
 import os
-from werkzeug.utils import secure_filename
 import cv2
 import time
-
-import pathlib
-import uuid
+import requests
 
 import numpy as np
 import json
 import wound_analysis
 from PIL import Image
-import pickle
 
-from imageio import imread
 import io
 import base64
 
@@ -47,20 +42,7 @@ def zipMeasure():
     namelist = archive.namelist()
 
     width = float(flask.request.form.get("width"))
-    lower_mask_one = str(flask.request.form.get("lower_mask_one"))
-    lower_mask_two = str(flask.request.form.get("lower_mask_two"))
-    upper_mask_one = str(flask.request.form.get("upper_mask_one"))
-    upper_mask_two = str(flask.request.form.get("upper_mask_two"))
-    mask_map = {
-        "lower_range": {
-            "first": helpers.convertStringToNumpyArray(lower_mask_one),
-            "second": helpers.convertStringToNumpyArray(lower_mask_two)
-        },
-        "upper_range": {
-            "first": helpers.convertStringToNumpyArray(upper_mask_one),
-            "second": helpers.convertStringToNumpyArray(upper_mask_two)
-        }
-    }
+    
     image_list = []
     for img_name in namelist:
         imgfile = archive.open(img_name)
@@ -74,7 +56,8 @@ def zipMeasure():
         buf.close()
 
         base64_bytes = base64.b64encode(image_bytes)
-        input_base64_image = "data:image/jpeg;base64," + base64_bytes.decode()
+        decoded = base64_bytes.decode()
+        input_base64_image = "data:image/jpeg;base64," + decoded
         
         pil_image = image.convert('RGB') 
         opencv_image = np.array(pil_image) 
@@ -89,6 +72,44 @@ def zipMeasure():
                                 fx=small_to_large_image_size_ratio, 
                                 fy=small_to_large_image_size_ratio, 
                                 interpolation=cv2.INTER_NEAREST)
+
+        # Select mask
+        manual_mask = flask.request.form.get("manual_mask")
+        manual_mask = True if manual_mask == "true" else False
+        
+        lower_mask_one, lower_mask_two, upper_mask_one, upper_mask_two = None, None, None, None
+        print("DEBUG: manual_mask", manual_mask)
+
+        if manual_mask:
+            print("DEBUG: manual_mask not run")
+            lower_mask_one = helpers.convertStringToNumpyArray(str(flask.request.form.get("lower_mask_one")))
+            lower_mask_two = helpers.convertStringToNumpyArray(str(flask.request.form.get("lower_mask_two")))
+            upper_mask_one = helpers.convertStringToNumpyArray(str(flask.request.form.get("upper_mask_one")))
+            upper_mask_two = helpers.convertStringToNumpyArray(str(flask.request.form.get("upper_mask_two")))
+        else:
+            print("DEBUG: manual_mask run")
+            mask_list = [(k.A_LR, k.A_UR), (k.B_LR, k.B_UR), (k.C_LR, k.C_UR), (k.D_LR, k.D_UR), (k.E_LR, k.E_UR)]
+            obj = {"b64img": decoded}
+            predicted_mask = int(requests.post(k.ML_API, json=obj).text)
+            print("predicted mask", predicted_mask)
+            #predicted_mask = siamese.predict(image, current_app.config["MODEL_PATH"])
+            lower_mask_one = mask_list[predicted_mask][0][0]
+            lower_mask_two = mask_list[predicted_mask][0][1]
+            upper_mask_one = mask_list[predicted_mask][1][0]
+            upper_mask_two = mask_list[predicted_mask][1][1]
+            print("DEBUG: manual_mask predicted mask = ", predicted_mask)
+
+        mask_map = {
+            "lower_range": {
+                "first": lower_mask_one,
+                "second": lower_mask_two
+            },
+            "upper_range": {
+                "first": upper_mask_one,
+                "second": upper_mask_two
+            }
+        }
+
         obj = analysis.zip_measurement(opencv_image, mask_map, width=width)
         obj["orig"] = input_base64_image
         image_list.append(obj)
@@ -141,7 +162,10 @@ def measure():
     else:
         print("DEBUG: manual_mask run")
         mask_list = [(k.A_LR, k.A_UR), (k.B_LR, k.B_UR), (k.C_LR, k.C_UR), (k.D_LR, k.D_UR), (k.E_LR, k.E_UR)]
-        predicted_mask = siamese.predict(image, current_app.config["MODEL_PATH"])
+        obj = {"b64img": b64_string}
+        predicted_mask = int(requests.post(k.ML_API, json=obj).text)
+        print("predicted mask", predicted_mask)
+        #predicted_mask = siamese.predict(image, current_app.config["MODEL_PATH"])
         lower_mask_one = mask_list[predicted_mask][0][0]
         lower_mask_two = mask_list[predicted_mask][0][1]
         upper_mask_one = mask_list[predicted_mask][1][0]
@@ -192,3 +216,14 @@ def testImage():
 def hello():
     """Return a friendly HTTP greeting."""
     return "This is the wound analysis api"
+
+@wound_analysis.app.route('/imageSend', methods=['POST', 'GET'])
+@cross_origin(supports_credentials=True)
+def imageSend():
+    
+    input_base64_image = flask.request.form.get("base64")
+    b64_string = input_base64_image.split("data:image/jpeg;base64")[1]
+
+    response = requests.post("localhost:5000", data={"b64img": b64_string})
+    print("response:", response)
+    return response

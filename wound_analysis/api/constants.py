@@ -36,3 +36,5 @@ VAL_STEP_1 = 5
 VAL_STEP_2 = 10
 VAL_STEP_3 = 15
 
+ML_API = "https://gallagher-wound-analysis-ml.herokuapp.com"
+#ML_API = 'http://localhost:5001/predictMask"
