@@ -57,11 +57,14 @@ def convertStringToNumpyArray(mask_string):
     numpy = np.array(number_list)
     return numpy
 
+
 def convertNumpyImageToString(numpy_image):
-    _, im_arr = cv2.imencode('.jpg', numpy_image)  # im_arr: image in Numpy one-dim array format.
+    # im_arr: image in Numpy one-dim array format.
+    _, im_arr = cv2.imencode('.jpg', numpy_image)
     base64_bytes = base64.b64encode(im_arr)
     jpg_as_string = "data:image/jpg;base64," + base64_bytes.decode('utf-8')
     return jpg_as_string
+
 
 def dayMaskMapper(day):
     if day == 0:
