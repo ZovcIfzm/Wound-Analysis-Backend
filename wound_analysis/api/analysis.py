@@ -14,6 +14,7 @@ import wound_analysis.api.helpers as helpers
 # Constants import
 from wound_analysis.api.constants import DEF_LOWER_RANGE, DEF_UPPER_RANGE, AREA_UPPER_LIMIT
 
+
 def measurement(image, rec_image, sq_ratio, lower_range, upper_range):
     overlay_img = rec_image.copy()
     _image = image.copy()
@@ -22,7 +23,7 @@ def measurement(image, rec_image, sq_ratio, lower_range, upper_range):
     edged = cv2.Canny(gray, 50, 100)
     edged = cv2.dilate(edged, None, iterations=9)
     edged = cv2.erode(edged, None, iterations=7)
-    
+
     edged = cv2.dilate(edged, None, iterations=1)
     cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL,
                             cv2.CHAIN_APPROX_NONE)
@@ -31,15 +32,14 @@ def measurement(image, rec_image, sq_ratio, lower_range, upper_range):
         (cnts, _) = contours.sort_contours(cnts)
     except:
         return {"drawn_image": overlay_img,
-            "areas": [],
-            "lower_range": lower_range,
-            "upper_range": upper_range,
-            "sq_ratio": sq_ratio,
-            "error": True}
-        
-    
+                "areas": [],
+                "lower_range": lower_range,
+                "upper_range": upper_range,
+                "sq_ratio": sq_ratio,
+                "error": True}
+
     areas = processing_helpers.measure_area(cnts, sq_ratio)
-    #helpers.display_image(edged)
+    # helpers.display_image(edged)
     helpers.draw_contours(overlay_img, cnts, sq_ratio)
 
     return {"drawn_image": overlay_img,
@@ -50,12 +50,16 @@ def measurement(image, rec_image, sq_ratio, lower_range, upper_range):
             "sq_ratio": sq_ratio,
             "error": False}
 
+
 def custom_measure(image, rec_image, sq_ratio, mask):
-    cur_lower_range = np.array([np.array(mask["lower_range"]["first"]), np.array(mask["lower_range"]["second"])])
-    cur_upper_range = np.array([np.array(mask["upper_range"]["first"]), np.array(mask["upper_range"]["second"])])
-    
-    data = measurement(image, rec_image, sq_ratio, cur_lower_range, cur_upper_range) 
-    
+    cur_lower_range = np.array(
+        [np.array(mask["lower_range"]["first"]), np.array(mask["lower_range"]["second"])])
+    cur_upper_range = np.array(
+        [np.array(mask["upper_range"]["first"]), np.array(mask["upper_range"]["second"])])
+
+    data = measurement(image, rec_image, sq_ratio,
+                       cur_lower_range, cur_upper_range)
+
     if data["error"] is False:
         return {"drawn_image": helpers.convertNumpyImageToString(data["drawn_image"]),
                 "edged_image": helpers.convertNumpyImageToString(data["edged_image"]),
@@ -66,6 +70,7 @@ def custom_measure(image, rec_image, sq_ratio, mask):
                 "error": False}
     else:
         return {"error": True, "error_message": "Can't find wounds"}
+
 
 def grid_measurement(image, mask, width=2.54, manual=False):
     masks = processing_helpers.extend_mask_search(mask)
@@ -91,10 +96,12 @@ def grid_measurement(image, mask, width=2.54, manual=False):
         for i in range(3):
             row = []
             for j in range(3):
-                row.append({"error": True, "error_message": "Can't identify green line. Please set to manual."})
+                row.append(
+                    {"error": True, "error_message": "Can't identify green line. Please set to manual."})
             matrix.append(row)
 
     return matrix
+
 
 def zip_measurement(image, mask, width=2.54, manual=False):
     try:
@@ -110,6 +117,7 @@ def zip_measurement(image, mask, width=2.54, manual=False):
         return return_object
     except:
         return {"error": True, "error_message": "Can't identify green line."}
+
 
 def manual_area_adjustment(prev_data, increase_sat):
 
