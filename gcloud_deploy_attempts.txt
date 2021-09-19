@@ -1,0 +1,5 @@
+yaml
+runtime: python37
+env: standard
+resources:
+  memory_gb: 4
