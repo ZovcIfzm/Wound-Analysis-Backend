@@ -103,7 +103,7 @@ def find_real_size(img, width):
     overlay_img = img.copy()
 
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    mask = cv2.inRange(hsv, (20, 60, 60), (75, 140, 190))
+    mask = cv2.inRange(hsv, (50, 60, 60), (100, 255, 255))
     image = cv2.bitwise_and(image, image, mask=mask)
     #image[mask > 0] = (255, 255, 255)
 
@@ -176,7 +176,7 @@ def find_real_size(img, width):
                          ), cv2.FONT_HERSHEY_SIMPLEX,
                         0.65, (255, 0, 0), 2)
         else:
-            cv2.putText(orig, "{:.2f}in".format(dimB),
+            cv2.putText(orig, "{:.2f} cm".format(dimB),
                         (int(trbrX + 10), int(trbrY)), cv2.FONT_HERSHEY_SIMPLEX,
                         0.65, (255, 0, 0), 2)
         # show the output image
