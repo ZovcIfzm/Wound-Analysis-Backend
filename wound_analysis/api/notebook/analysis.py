@@ -9,11 +9,17 @@ import zipfile
 
 # Function imports
 
+import processing_helpers
+import helpers
+from constants import DEF_LOWER_RANGE, DEF_UPPER_RANGE, AREA_UPPER_LIMIT
+
+'''
 import wound_analysis.api.processing_helpers as processing_helpers
 import wound_analysis.api.helpers as helpers
 
 # Constants import
 from wound_analysis.api.constants import DEF_LOWER_RANGE, DEF_UPPER_RANGE, AREA_UPPER_LIMIT
+'''
 
 
 def measurement(image, rec_image, sq_ratio, lower_range, upper_range):
