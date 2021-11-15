@@ -25,11 +25,6 @@ from flask_cors import CORS, cross_origin
 # called `app` in `main.py`.
 
 
-@wound_analysis.app.route('/time/')
-def get_current_time():
-    return {'time': time.time()}
-
-
 @wound_analysis.app.route('/zipMeasure', methods=['POST', 'GET'])
 @cross_origin(supports_credentials=True)
 def zipMeasure():
@@ -126,27 +121,15 @@ def zipMeasure():
 @cross_origin(supports_credentials=True)
 def measure():
     # Retrieve fields
-    width = float(flask.request.form.get("width"))
+    req = flask.request.get_json()
 
-    input_base64_image = flask.request.form.get("base64")
-    b64_string = input_base64_image.split("data:image/jpeg;base64")[1]
-    manual_width = flask.request.form.get("manual_width")
-    manual_mask = flask.request.form.get("manual_mask")
-
-    print("DEBUG: raw manual_mask:", manual_mask)
-    print("DEBUG: raw manual_width:", manual_width)
-    manual_width = True if manual_width == "true" else False
-    manual_mask = True if manual_mask == "true" else False
+    settings = req["settings"]
 
     # Convert image file to opencv format
-    decoded = base64.b64decode(b64_string)
-    ioed = io.BytesIO(decoded)
-    image = Image.open(ioed)
-    pil_image = image.convert('RGB')
-    opencv_image = np.array(pil_image)
-
-    # Convert RGB to BGR
-    opencv_image = opencv_image[:, :, ::-1].copy()
+    input_base64_image = req["base64"]
+    b64_string = input_base64_image.split("data:image/jpeg;base64")[1]
+    image = Image.open(io.BytesIO(base64.b64decode(b64_string)))
+    opencv_image = np.array(image.convert("RGB"))[:, :, ::-1].copy()
 
     small_to_large_image_size_ratio = 0.25
     opencv_image = cv2.GaussianBlur(opencv_image, (3, 3), cv2.BORDER_DEFAULT)
@@ -155,20 +138,10 @@ def measure():
                               fx=small_to_large_image_size_ratio,
                               fy=small_to_large_image_size_ratio,
                               interpolation=cv2.INTER_NEAREST)
-    lower_mask_one, lower_mask_two, upper_mask_one, upper_mask_two = None, None, None, None
-    print("DEBUG: manual_mask", manual_mask)
+
     # Find mask
-    if manual_mask:
-        print("DEBUG: manual_mask run")
-        lower_mask_one = helpers.convertStringToNumpyArray(
-            str(flask.request.form.get("lower_mask_one")))
-        lower_mask_two = helpers.convertStringToNumpyArray(
-            str(flask.request.form.get("lower_mask_two")))
-        upper_mask_one = helpers.convertStringToNumpyArray(
-            str(flask.request.form.get("upper_mask_one")))
-        upper_mask_two = helpers.convertStringToNumpyArray(
-            str(flask.request.form.get("upper_mask_two")))
-    else:
+    lower_mask_one, lower_mask_two, upper_mask_one, upper_mask_two = None, None, None, None
+    if settings["autoMask"]:
         print("DEBUG: manual_mask not run")
         mask_list = [(k.A_LR, k.A_UR), (k.B_LR, k.B_UR),
                      (k.C_LR, k.C_UR), (k.D_LR, k.D_UR), (k.E_LR, k.E_UR)]
@@ -180,6 +153,15 @@ def measure():
         upper_mask_one = mask_list[predicted_mask][1][0]
         upper_mask_two = mask_list[predicted_mask][1][1]
         print("DEBUG: manual_mask predicted mask = ", predicted_mask)
+    else:
+        lower_mask_one = np.asarray(settings["lowerBound"])
+        lower_mask_two = np.asarray(settings["lowerBound"])
+        lower_mask_one[0] = lower_mask_one[0] % 180
+        lower_mask_two[0] = 0
+
+        upper_mask_one = np.asarray(settings["upperBound"])
+        upper_mask_one[0] = 180
+        upper_mask_two = np.asarray(settings["upperBound"])
 
     mask_map = {
         "lower_range": {
@@ -193,7 +175,7 @@ def measure():
     }
 
     data_matrix = analysis.grid_measurement(
-        opencv_image, mask_map, manual=manual_width, width=width)
+        opencv_image, mask_map, manual=not settings["autoWidth"], width=settings["width"])
     for row in data_matrix:
         for col in row:
             col["orig"] = input_base64_image
@@ -202,40 +184,7 @@ def measure():
     return response
 
 
-@wound_analysis.app.route('/testImage', methods=['POST', 'GET'])
-@cross_origin(supports_credentials=True)
-def testImage():
-
-    # Retrieve fields
-    fileobj = flask.request.files["file"]
-    filename = fileobj.filename
-
-    # Convert image file to opencv format
-    pil_image = Image.open(fileobj).convert('RGB')
-    opencv_image = np.array(pil_image)
-
-    # Convert RGB to BGR
-    opencv_image = opencv_image[:, :, ::-1].copy()
-
-    response = json.dumps(helpers.convertNumpyImageToString(opencv_image))
-    # print(response)
-    return response
-
-
 @wound_analysis.app.route('/', methods=['POST', 'GET'])
 @cross_origin(supports_credentials=True)
 def hello():
-    """Return a friendly HTTP greeting."""
     return "This is the wound analysis api"
-
-
-@wound_analysis.app.route('/imageSend', methods=['POST', 'GET'])
-@cross_origin(supports_credentials=True)
-def imageSend():
-
-    input_base64_image = flask.request.form.get("base64")
-    b64_string = input_base64_image.split("data:image/jpeg;base64")[1]
-
-    response = requests.post("localhost:5000", data={"b64img": b64_string})
-    print("response:", response)
-    return response
