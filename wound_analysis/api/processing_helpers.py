@@ -139,27 +139,21 @@ def find_real_size(img, width):
 
         box = perspective.order_points(box)
 
-        cv2.drawContours(orig, [box.astype("int")], -1, (255, 0, 0), 1)
-        # Also draw for returned image (normal image + lines)
-        cv2.drawContours(overlay_img, [box.astype("int")], -1, (255, 0, 0), 1)
-
-        # unpack the ordered bounding box, then compute the midpoint
-        # between the top-left and top-right coordinates, followed by
-        # the midpoint between bottom-left and bottom-right coordinates
         (tl, tr, br, bl) = box
         (tltrX, tltrY) = midpoint(tl, tr)
         (blbrX, blbrY) = midpoint(bl, br)
-        # compute the midpoint between the top-left and top-right points,
-        # followed by the midpoint between the top-righ and bottom-right
         (tlblX, tlblY) = midpoint(tl, bl)
         (trbrX, trbrY) = midpoint(tr, br)
 
-        # compute the Euclidean distance between the midpoints
         dA = dist.euclidean((tltrX, tltrY), (blbrX, blbrY))
         dB = dist.euclidean((tlblX, tlblY), (trbrX, trbrY))
-        # if the pixels per metric has not been initialized, then
-        # compute it as the ratio of pixels to supplied metric
-        # (in this case, inches)
+
+        # check that this is the correct line:
+        if not (dA/dB > width*2*0.8 or dB/dA > width*2*0.8):
+            continue
+        else:
+            print(dA/dB, dB/dA)
+
         if dA > dB:
             pixelsPerMetric = dA / width
         else:
@@ -168,6 +162,9 @@ def find_real_size(img, width):
         # compute the size of the object
         dimA = dA / pixelsPerMetric
         dimB = dB / pixelsPerMetric
+
+        cv2.drawContours(orig, [box.astype("int")], -1, (255, 0, 0), 1)
+        cv2.drawContours(overlay_img, [box.astype("int")], -1, (255, 0, 0), 1)
 
         # draw the object sizes on the image
         if (dA > dB):
@@ -179,10 +176,6 @@ def find_real_size(img, width):
             cv2.putText(orig, "{:.2f} cm".format(dimB),
                         (int(trbrX + 10), int(trbrY)), cv2.FONT_HERSHEY_SIMPLEX,
                         0.65, (255, 0, 0), 2)
-        # show the output image
-        #_orig = cv2.resize(orig, (1250,1250))
-        #cv2.imshow("Image", _orig)
-        # cv2.waitKey(0)
 
     return pixelsPerMetric, orig
 
