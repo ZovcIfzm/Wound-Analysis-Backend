@@ -73,14 +73,15 @@ def custom_measure(image, rec_image, sq_ratio, mask):
         return {"error": True, "error_message": "Can't find wounds"}
 
 
-def grid_measurement(image, mask, width=2.54, manual=False):
+def grid_measurement(image, mask, lineLowerBound, width=2.54, manual=False):
     masks = processing_helpers.extend_mask_search(mask)
     matrix = []
     try:
         sq_ratio = None
         rec_image = None
         if not manual:
-            ratio, rec_image = processing_helpers.find_real_size(image, width)
+            ratio, rec_image = processing_helpers.find_real_size(
+                image, width, lineLowerBound)
             sq_ratio = ratio*ratio
         else:
             sq_ratio = helpers.find_sq_ratio(image, width)

@@ -175,7 +175,7 @@ def measure():
     }
 
     data_matrix = analysis.grid_measurement(
-        opencv_image, mask_map, manual=not settings["autoWidth"], width=settings["width"])
+        opencv_image, mask_map, lineLowerBound=tuple(settings["lineLowerBound"]), manual=not settings["autoWidth"], width=settings["width"])
     for row in data_matrix:
         for col in row:
             col["orig"] = input_base64_image

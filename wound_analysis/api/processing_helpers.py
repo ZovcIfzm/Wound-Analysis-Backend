@@ -97,15 +97,15 @@ def extend_mask_search(mask):
     return matrix
 
 
-def find_real_size(img, width):
+def find_real_size(img, width, lineLowerBound=(40, 60, 60)):
     # load the image, convert it to grayscale, and blur it slightly
     image = img.copy()
     overlay_img = img.copy()
 
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    mask = cv2.inRange(hsv, (40, 30, 60), (110, 255, 255))
+    mask = cv2.inRange(hsv, lineLowerBound, (110, 255, 255))
     image = cv2.bitwise_and(image, image, mask=mask)
-    #image[mask > 0] = (255, 255, 255)
+    # image[mask > 0] = (255, 255, 255)
 
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (7, 7), 0)
@@ -149,10 +149,16 @@ def find_real_size(img, width):
         dB = dist.euclidean((tlblX, tlblY), (trbrX, trbrY))
 
         # check that this is the correct line:
+        '''
         if not (dA/dB > width*2*0.8 or dB/dA > width*2*0.8):
+            print("continued", dA/dB, dB/dA)
             continue
         else:
             print(dA/dB, dB/dA)
+        '''
+
+        cv2.drawContours(orig, [box.astype("int")], -1, (255, 0, 0), 1)
+        cv2.drawContours(overlay_img, [box.astype("int")], -1, (255, 0, 0), 1)
 
         if dA > dB:
             pixelsPerMetric = dA / width
@@ -162,9 +168,6 @@ def find_real_size(img, width):
         # compute the size of the object
         dimA = dA / pixelsPerMetric
         dimB = dB / pixelsPerMetric
-
-        cv2.drawContours(orig, [box.astype("int")], -1, (255, 0, 0), 1)
-        cv2.drawContours(overlay_img, [box.astype("int")], -1, (255, 0, 0), 1)
 
         # draw the object sizes on the image
         if (dA > dB):
