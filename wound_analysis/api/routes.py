@@ -28,20 +28,21 @@ from flask_cors import CORS, cross_origin
 @wound_analysis.app.route('/zipMeasure', methods=['POST', 'GET'])
 @cross_origin(supports_credentials=True)
 def zipMeasure():
+    # Retrieve fields
+    req = flask.request.get_json()
 
+    settings = json.loads(flask.request.form.get("settings"))
+
+    # Convert image file to opencv format
     fileobj = flask.request.files["file"]
     filename = fileobj.filename
 
     archive = zipfile.ZipFile(fileobj, 'r')
     namelist = archive.namelist()
 
-    width = float(flask.request.form.get("width"))
-
     image_list = []
     for img_name in namelist:
         imgfile = archive.open(img_name)
-
-        # Convert image file to opencv format
         image = Image.open(imgfile)
         buf = io.BytesIO()
         image.save(buf, 'jpeg')
@@ -68,28 +69,13 @@ def zipMeasure():
                                   fy=small_to_large_image_size_ratio,
                                   interpolation=cv2.INTER_NEAREST)
 
-        # Select mask
-        manual_mask = flask.request.form.get("manual_mask")
-        manual_mask = True if manual_mask == "true" else False
-
+        # Find mask
         lower_mask_one, lower_mask_two, upper_mask_one, upper_mask_two = None, None, None, None
-        print("DEBUG: manual_mask", manual_mask)
-
-        if manual_mask:
+        if settings["autoMask"]:
             print("DEBUG: manual_mask not run")
-            lower_mask_one = helpers.convertStringToNumpyArray(
-                str(flask.request.form.get("lower_mask_one")))
-            lower_mask_two = helpers.convertStringToNumpyArray(
-                str(flask.request.form.get("lower_mask_two")))
-            upper_mask_one = helpers.convertStringToNumpyArray(
-                str(flask.request.form.get("upper_mask_one")))
-            upper_mask_two = helpers.convertStringToNumpyArray(
-                str(flask.request.form.get("upper_mask_two")))
-        else:
-            print("DEBUG: manual_mask run")
             mask_list = [(k.A_LR, k.A_UR), (k.B_LR, k.B_UR),
                          (k.C_LR, k.C_UR), (k.D_LR, k.D_UR), (k.E_LR, k.E_UR)]
-            obj = {"b64img": decoded}
+            obj = {"b64img": b64_string}
             predicted_mask = int(requests.post(k.ML_API, json=obj).text)
             print("predicted mask", predicted_mask)
             lower_mask_one = mask_list[predicted_mask][0][0]
@@ -97,6 +83,15 @@ def zipMeasure():
             upper_mask_one = mask_list[predicted_mask][1][0]
             upper_mask_two = mask_list[predicted_mask][1][1]
             print("DEBUG: manual_mask predicted mask = ", predicted_mask)
+        else:
+            lower_mask_one = np.asarray(settings["lowerBound"])
+            lower_mask_two = np.asarray(settings["lowerBound"])
+            lower_mask_one[0] = lower_mask_one[0] % 180
+            lower_mask_two[0] = 0
+
+            upper_mask_one = np.asarray(settings["upperBound"])
+            upper_mask_one[0] = 180
+            upper_mask_two = np.asarray(settings["upperBound"])
 
         mask_map = {
             "lower_range": {
@@ -109,7 +104,8 @@ def zipMeasure():
             }
         }
 
-        obj = analysis.zip_measurement(opencv_image, mask_map, width=width)
+        obj = analysis.zip_measurement(opencv_image, mask_map, lineLowerBound=tuple(
+            settings["lineLowerBound"]),  manual=not settings["autoWidth"], width=settings["width"])
         obj["orig"] = input_base64_image
         image_list.append(obj)
 

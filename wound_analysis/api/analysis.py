@@ -105,12 +105,13 @@ def grid_measurement(image, mask, lineLowerBound, width=2.54, manual=False):
     return matrix
 
 
-def zip_measurement(image, mask, width=2.54, manual=False):
+def zip_measurement(image, mask, lineLowerBound, width=2.54, manual=False):
     try:
         sq_ratio = None
         rec_image = None
         if not manual:
-            ratio, rec_image = processing_helpers.find_real_size(image, width)
+            ratio, rec_image = processing_helpers.find_real_size(
+                image, width, lineLowerBound)
             sq_ratio = ratio*ratio
         else:
             sq_ratio = helpers.find_sq_ratio(image, width)
@@ -119,19 +120,3 @@ def zip_measurement(image, mask, width=2.54, manual=False):
         return return_object
     except:
         return {"error": True, "error_message": "Can't identify green line."}
-
-
-def manual_area_adjustment(prev_data, increase_sat):
-
-    if increase_sat:
-        prev_data["lower_range"][0][1] *= 1.05
-        prev_data["lower_range"][1][1] *= 1.05
-    else:
-        prev_data["lower_range"][0][1] *= 0.95
-        prev_data["lower_range"][1][1] *= 0.95
-
-    data = measurement(
-        prev_data["original_image"], prev_data["sq_ratio"], prev_data["lower_range"], prev_data["upper_range"])
-    # if not data["error"]:
-    #    helpers.display_image(data["drawn_image"])
-    return data
